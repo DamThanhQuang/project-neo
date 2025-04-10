@@ -170,4 +170,41 @@ export class BusinessService {
       );
     }
   }
+
+  async findProductsByUserId(userId: string): Promise<any> {
+    if (!isValidObjectId(userId)) {
+      throw new NotFoundException(`Invalid user id: ${userId}`);
+    }
+
+    try {
+      const products = await this.productModel
+        .find({ businessId: new Types.ObjectId(userId) })
+        .lean();
+
+      if (!products || products.length === 0) {
+        return [];
+      }
+
+      const formattedProducts = products.map((product) => ({
+        id: product._id.toString(),
+        title: product.title || product.title,
+        description: product.description || '',
+        price: product.price || 0,
+        image: product.image || 'https://via.placeholder.com/300x200',
+        location:
+          typeof product.location === 'object'
+            ? ` ${product.location.city || ''}, ${
+                product.location.country || ''
+              }`
+            : product.location || 'Long Biên, Hà Nội',
+      }));
+
+      return formattedProducts;
+    } catch (error) {
+      console.error('Error in findProductsByUserId:', error);
+      throw new InternalServerErrorException(
+        'Failed to fetch products for user',
+      );
+    }
+  }
 }

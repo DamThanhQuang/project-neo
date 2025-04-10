@@ -119,10 +119,15 @@ export class UserService {
   }
 
   async getUserById(id: string): Promise<User> {
-    const user = await this.userModel.findById(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel.findById(id);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return user;
+    } catch (error) {
+      console.error('Error fetching user', error);
+      throw new InternalServerErrorException('Error fetching user');
     }
-    return user;
   }
 }

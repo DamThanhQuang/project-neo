@@ -7,6 +7,7 @@ import Image from "next/image";
 import { FaCloudUploadAlt, FaTrash, FaImages } from "react-icons/fa";
 import { MdOutlineCabin } from "react-icons/md";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 interface PhotoFile extends File {
   preview: string;
@@ -131,7 +132,7 @@ export default function Photo() {
   const uploadImages = async () => {
     if (photos.length === 0) return [];
 
-    const token = localStorage.getItem("accessToken");
+    const token = Cookies.get("token");
     if (!token) {
       throw new Error("Bạn cần đăng nhập để tải ảnh lên");
     }
@@ -144,7 +145,7 @@ export default function Photo() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/upload/s3",
+        "http://localhost:8000/api/v1/s3/create-product-photo/s3",
         formData,
         {
           headers: {

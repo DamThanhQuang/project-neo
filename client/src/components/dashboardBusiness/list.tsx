@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "@/lib/axios";
+import Cookies from "js-cookie";
 
 interface Product {
   id: string;
@@ -27,8 +28,21 @@ export default function List() {
 
     const fetchData = async () => {
       try {
+        const userId = Cookies.get("userId");
+        console.log(userId);
+
+        const token = Cookies.get("token");
         // Single API call to get all products
-        const response = await axios.get("/business/products");
+        const response = await axios.get(`/business/products/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Response data:", response.data);
+        // Check if the response is an array and has products
+        if (!Array.isArray(response.data)) {
+          throw new Error("Invalid response format");
+        }
         setProducts(response.data);
         console.log("Products fetched:", response.data);
 

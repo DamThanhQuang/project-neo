@@ -57,7 +57,13 @@ export function LoginForm({
       // Navigate to profile
       router.push("/home");
     } catch (error) {
-      console.error("Login error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        // Hiển thị chi tiết lỗi từ server
+        console.error("Lỗi từ server:", error.response.data);
+        // Có thể hiển thị thông báo lỗi cho người dùng ở đây
+      } else {
+        console.error("Lỗi kết nối:", (error as Error).message);
+      }
     }
   };
   return (

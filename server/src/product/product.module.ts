@@ -4,6 +4,7 @@ import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { Product, ProductSchema } from './schemas/product.schemas';
 import { Business, BusinessSchema } from '@/business/schemas/business.schema';
+import { User, UserSchema } from '../user/schemas/user.schema';
 import { CommonModule } from '@/common/common.module';
 
 @Module({
@@ -11,6 +12,7 @@ import { CommonModule } from '@/common/common.module';
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
       { name: Business.name, schema: BusinessSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     CommonModule,
   ],

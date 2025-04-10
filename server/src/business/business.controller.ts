@@ -4,6 +4,7 @@ import { Public } from '@/auth/decorators/customs.decorator';
 import { Types } from 'mongoose';
 import { UpdateProductDto } from '@/product/dto/update-product.dto';
 import { UpdatePropertyProductDto } from '@/product/dto/update-property-product.dto';
+import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
 
 @Controller('business')
 export class BusinessController {
@@ -19,6 +20,16 @@ export class BusinessController {
   @Public()
   getAllProducts() {
     return this.businessService.findAllProducts();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('products/:id')
+  async getProductById(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new Error(`Invalid ObjectId format: ${id}`);
+    }
+    const objectId = new Types.ObjectId(id);
+    return this.businessService.findProductsByUserId(objectId.toString());
   }
 
   @Get('detail-product/:id')

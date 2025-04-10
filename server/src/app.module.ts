@@ -21,9 +21,11 @@ import { BookingModule } from './booking/booking.module';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const uri = configService.get<string>('MONGO_URI');
+        console.log('Connecting to MongoDB:', uri);
+        return { uri };
+      },
       inject: [ConfigService],
     }),
     S3Module,

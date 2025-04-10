@@ -99,19 +99,16 @@ const ProfileUser = () => {
   const fetchProfile = async (id: string) => {
     try {
       setLoading(true);
-      console.log("Fetching profile for userId:", id);
 
+      const userId = Cookies.get("userId");
       const token = Cookies.get("token");
-      console.log("Token:", token);
 
       // Update the API endpoint to include the user ID
-      const response = await axios.get(`user/profile`, {
+      const response = await axios.get(`user/profile/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("Profile data received:", response.data);
 
       // Transform the backend data to match our UserProfile interface
       const userData = response.data;
@@ -192,7 +189,6 @@ const ProfileUser = () => {
         };
       });
 
-      console.log("Profile updated:", response.data);
       setIsEditModalOpen(false);
     } catch (err) {
       console.error("Update error details:", err);
@@ -309,8 +305,6 @@ const ProfileUser = () => {
     try {
       const userId = Cookies.get("userId");
       const token = Cookies.get("token");
-
-      console.log("Checking auth - userId:", userId, "token:", token);
 
       if (!userId || !token) {
         console.log("No auth credentials found");

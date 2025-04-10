@@ -135,23 +135,6 @@ export default function Location() {
       // Lưu thông tin vào localStorage
       localStorage.setItem("location", JSON.stringify(formData));
 
-      // Tùy chọn: Gửi dữ liệu đến backend
-      // Chỉ thực hiện khi API yêu cầu lưu dữ liệu theo từng bước
-      // const token = localStorage.getItem('accessToken');
-      // if (token) {
-      //   await axios.post(
-      //     'http://localhost:3001/product/update-location',
-      //     { location: formData },
-      //     {
-      //       headers: {
-      //         'Content-Type': 'application/json',
-      //         'Authorization': `Bearer ${token}`
-      //       }
-      //     }
-      //   );
-      // }
-
-      // Chuyển đến bước tiếp theo
       router.push("/create/floor-plan");
     } catch (err: any) {
       console.error("Lỗi khi lưu thông tin địa điểm:", err);
