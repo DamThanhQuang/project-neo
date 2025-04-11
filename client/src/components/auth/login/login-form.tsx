@@ -10,12 +10,15 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CiUser } from "react-icons/ci";
 import { FcGoogle } from "react-icons/fc";
+import { RiLockPasswordLine } from "react-icons/ri";
 import Cookies from "js-cookie";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -24,12 +27,16 @@ export function LoginForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     router.push("/register");
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:8000/api/v1/auth/login",
@@ -38,12 +45,10 @@ export function LoginForm({
       );
 
       const { userId, role, token } = response.data;
-      console.log("Login successful, userId:", userId); // Debug log
-      console.log("Token:", token); // Debug log
 
       // Set cookies with proper configuration
       Cookies.set("userId", userId, {
-        expires: 1, // 1 day
+        expires: 1,
         path: "/",
         sameSite: "lax",
       });
@@ -54,84 +59,118 @@ export function LoginForm({
         sameSite: "lax",
       });
 
-      // Navigate to profile
+      toast.success("Login successful!");
       router.push("/home");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Hiển thị chi tiết lỗi từ server
-        console.error("Lỗi từ server:", error.response.data);
-        // Có thể hiển thị thông báo lỗi cho người dùng ở đây
+        toast.error(error.response.data.message || "Login failed");
       } else {
-        console.error("Lỗi kết nối:", (error as Error).message);
+        toast.error("Connection error. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+    <div
+      className={cn(
+        "flex justify-center items-center w-full max-w-md mx-auto",
+        className
+      )}
+      {...props}
+    >
+      <Card className="w-full shadow-lg border-opacity-50">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Welcome Back
+          </CardTitle>
+          <CardDescription className="text-center">
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
               <div className="relative">
-                <CiUser className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+                <CiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
                   required
-                  className="pl-10"
+                  className="pl-10 h-11 border-gray-300 focus:ring-2 focus:ring-primary/50"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
-            <div className="grid gap-2 mt-4">
-              <div className="flex items-center ">
-                <Label htmlFor="password">Password</Label>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
                 <a
                   href="#"
-                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  className="text-xs font-medium text-primary hover:underline"
                 >
                   Forgot your password?
                 </a>
               </div>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <RiLockPasswordLine className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  className="pl-10 h-11 border-gray-300 focus:ring-2 focus:ring-primary/50"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full mt-4">
-              Login
+            <Button
+              type="submit"
+              className="w-full h-11 font-medium transition-all"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
-            <div className="mt-4 flex items-center justify-center">
-              <p>OR</p>
+
+            <div className="relative flex items-center justify-center my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative px-4 text-sm text-gray-500 bg-white">
+                OR
+              </div>
             </div>
-            <Button variant="outline" className="w-full mt-4">
-              Login with Google
-              <FcGoogle />
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 font-medium border-gray-300 hover:bg-gray-50 transition-all"
+            >
+              <FcGoogle className="mr-2 h-5 w-5" />
+              Continue with Google
             </Button>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account? {""}
-              <a
-                href="/register"
-                className="underline underline-offset-4"
-                onClick={handleRegisterClick}
-              >
-                Sign up
-              </a>
-            </div>
           </form>
         </CardContent>
+        <CardFooter>
+          <p className="text-center text-sm w-full">
+            Don&apos;t have an account?{" "}
+            <a
+              href="/register"
+              className="font-medium text-primary hover:underline"
+              onClick={handleRegisterClick}
+            >
+              Create account
+            </a>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

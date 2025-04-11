@@ -30,22 +30,8 @@ export class UserController {
     return this.userService.registerBusiness(userId, dto);
   }
 
-  @Get('profile')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@Req() req: Request) {
-    const userId = req.cookies.userId;
-    if (!userId) {
-      throw new UnauthorizedException('Chưa đăng nhập');
-    }
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
-    }
-    return user;
-  }
-
   @Put(':id/avatar')
-  @UseGuards(JwtAuthGuard)
   updateAvatar(@Param('id') id: string, @Body() avatar: string) {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');
@@ -65,8 +51,8 @@ export class UserController {
     );
   }
 
-  @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @Put(':id')
   async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');
@@ -74,9 +60,33 @@ export class UserController {
     return this.userService.updateUser(id, dto);
   }
 
-  @Get(':id')
   @UseGuards(JwtAuthGuard)
+  @Get(':id')
   async getUser(@Param('id') id: string) {
+    // Kiểm tra đối với các đường dẫn đặc biệt
+    if (id === 'profile') {
+      throw new BadRequestException(
+        'Invalid user ID: Use /profile/:id endpoint instead',
+      );
+    }
+
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
     return this.userService.getUserById(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile/:id')
+  async getProfile(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.cookies.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Chưa đăng nhập');
+    }
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
+    }
+    return user;
   }
 }

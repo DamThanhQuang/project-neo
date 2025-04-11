@@ -64,7 +64,7 @@ export default function Header() {
       const token = Cookies.get("token");
 
       if (userId && token) {
-        const response = await axios.get(`user/profile`, {
+        const response = await axios.get(`user/profile/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

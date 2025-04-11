@@ -46,7 +46,6 @@ export default function Home() {
       }
 
       const data = response.data;
-      console.log("Fetched products:", data);
 
       const formattedData = data.map((item: any) => ({
         id: item._id,
