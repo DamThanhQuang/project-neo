@@ -2,7 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import {
   FaStar,
   FaHeart,
@@ -27,6 +26,10 @@ import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import Cookies from "js-cookie";
+import BookingForm, {
+  useBookingCalculations,
+} from "@/components/booking/BookingForm";
+import BookingSummary from "@/components/booking/BookingSummary";
 
 interface Rating {
   stars: number;
@@ -64,6 +67,10 @@ interface Product {
     image: string;
     isSuperhost: boolean;
   };
+  livingRooms: number;
+  bedrooms: number;
+  beds: number;
+  bathrooms: number;
   amenities: string[];
   ratings: Rating[];
   totalRatings: number;
@@ -104,94 +111,9 @@ export default function ProductDetail() {
   const galleryRef = useRef<HTMLDivElement>(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const [booking, setBooking] = useState({
-    dateRange: {
-      startDate: new Date(),
-      endDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-      key: "selection",
-    },
-    guests: 1,
-    isSubmitting: false,
-    message: "",
-    error: null as string | null,
-    success: false,
-  });
-
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
     // Could add API call to save favorite status
-  };
-
-  // Calculate number of nights and total price
-  const nightCount =
-    booking.dateRange.endDate && booking.dateRange.startDate
-      ? Math.ceil(
-          (booking.dateRange.endDate.getTime() -
-            booking.dateRange.startDate.getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
-      : 1;
-
-  const totalPrice = (product?.price || 0) * nightCount;
-  const serviceFee = Math.round(totalPrice * 0.12); // Example service fee
-  const totalWithFees = totalPrice + serviceFee;
-
-  // Handle booking submission
-  const handleBookNow = async () => {
-    if (!product) return;
-
-    const token = Cookies.get("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    try {
-      setBooking((prev) => ({ ...prev, isSubmitting: true, error: null }));
-
-      const bookingData = {
-        productId: product.id,
-        checkIn: booking.dateRange.startDate,
-        checkOut: booking.dateRange.endDate,
-        guests: booking.guests,
-        totalPrice: totalPrice,
-      };
-
-      const response = await axios.post("/bookings/create", bookingData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log(response);
-
-      setBooking((prev) => ({
-        ...prev,
-        isSubmitting: false,
-        success: true,
-        message:
-          "Đặt phòng thành công! Chúng tôi sẽ gửi thông tin xác nhận đến email của bạn.",
-      }));
-
-      // Close modal after 3 seconds of success
-      setTimeout(() => {
-        setShowBookingModal(false);
-        setBooking((prev) => ({
-          ...prev,
-          success: false,
-          message: "",
-        }));
-      }, 3000);
-    } catch (error) {
-      console.error("Booking error:", error);
-      setBooking((prev) => ({
-        ...prev,
-        isSubmitting: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Không thể hoàn tất đặt phòng. Vui lòng thử lại.",
-      }));
-    }
   };
 
   useEffect(() => {
@@ -287,6 +209,10 @@ export default function ProductDetail() {
             "Parking",
             "Air Conditioning",
           ],
+          livingRooms: productData.livingRooms || 1,
+          bedrooms: productData.bedrooms || 1,
+          beds: productData.beds || 1,
+          bathrooms: productData.bathrooms || 1,
           ratings: [
             { stars: 5, count: 0, percentage: 0 },
             { stars: 4, count: 0, percentage: 0 },
@@ -486,204 +412,6 @@ export default function ProductDetail() {
     </AnimatePresence>
   );
 
-  // Booking modal
-  const BookingModal = () => (
-    <AnimatePresence>
-      {showBookingModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto"
-          onClick={() => setShowBookingModal(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative">
-              <div className="p-6 border-b border-gray-100">
-                <button
-                  onClick={() => setShowBookingModal(false)}
-                  className="absolute top-6 left-6 text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-100 transition"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                </button>
-                <h3 className="text-2xl font-bold text-center text-gray-800">
-                  Hoàn tất đặt phòng
-                </h3>
-              </div>
-
-              <div className="p-6">
-                <div className="mb-6">
-                  <div className="bg-gray-50 p-4 rounded-xl mb-5">
-                    <div className="flex items-center gap-4 mb-3">
-                      {product.image[0] && (
-                        <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={product.image[0]}
-                            alt={product.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <h4 className="font-semibold text-gray-700">
-                          {product.title}
-                        </h4>
-                        <p className="text-sm text-gray-500">
-                          {product.location.city}, {product.location.country}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <FaRegCalendarAlt className="mr-2" />
-                    Chọn ngày
-                  </h4>
-                  <div className="mb-6">
-                    <DateRange
-                      editableDateInputs={true}
-                      onChange={(item) =>
-                        setBooking((prev) => ({
-                          ...prev,
-                          dateRange: {
-                            startDate: item.selection.startDate || new Date(),
-                            endDate:
-                              item.selection.endDate ||
-                              new Date(
-                                new Date().setDate(new Date().getDate() + 1)
-                              ),
-                            key: item.selection.key || "selection",
-                          },
-                        }))
-                      }
-                      moveRangeOnFirstSelection={false}
-                      ranges={[booking.dateRange]}
-                      minDate={new Date()}
-                      className="w-full border rounded-xl overflow-hidden"
-                      rangeColors={["#EC4899"]}
-                    />
-                  </div>
-
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
-                    <FaUser className="mr-2" />
-                    Số lượng khách
-                  </h4>
-                  <div className="flex items-center border rounded-xl p-4 mb-6">
-                    <select
-                      value={booking.guests}
-                      onChange={(e) =>
-                        setBooking((prev) => ({
-                          ...prev,
-                          guests: parseInt(e.target.value),
-                        }))
-                      }
-                      className="w-full outline-none bg-transparent text-gray-700"
-                    >
-                      {[...Array(10)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {i + 1} khách{i !== 0 ? "" : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="border-t border-gray-100 pt-4 pb-1">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">
-                        ₫{product.price} × {nightCount} đêm
-                      </span>
-                      <span className="font-medium">₫{totalPrice}</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Phí dịch vụ</span>
-                      <span className="font-medium">₫{serviceFee}</span>
-                    </div>
-                    <div className="flex justify-between pt-3 border-t border-gray-100 mt-3 font-bold text-gray-800">
-                      <span>Tổng</span>
-                      <span>₫{totalWithFees}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {booking.error && (
-                  <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
-                    <p className="font-medium">Lỗi!</p>
-                    <p>{booking.error}</p>
-                  </div>
-                )}
-
-                {booking.success && (
-                  <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg">
-                    <p className="font-medium">Thành công!</p>
-                    <p>{booking.message}</p>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleBookNow}
-                  disabled={booking.isSubmitting}
-                  className="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-lg hover:from-pink-600 hover:to-rose-600 transition duration-300 shadow-lg shadow-rose-200 disabled:opacity-70 flex justify-center items-center"
-                >
-                  {booking.isSubmitting ? (
-                    <>
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Đang xử lý...
-                    </>
-                  ) : (
-                    "Đặt phòng ngay"
-                  )}
-                </button>
-
-                <p className="text-xs text-gray-500 text-center mt-3">
-                  Bạn sẽ không bị trừ tiền cho đến khi xác nhận.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <>
       {/* Main Header - Shows when scrolling up or at top */}
@@ -833,10 +561,11 @@ export default function ProductDetail() {
                 </h2>
                 <div className="flex flex-wrap gap-2 items-center text-gray-700">
                   <span>
-                    {product.amenities[0]} • {product.amenities[1]}
+                    {product.livingRooms} • {product.bedrooms}•{product.beds}•
+                    {product.bathrooms}
                   </span>
                   <span className="text-gray-400">•</span>
-                  <span>Tối đa {booking.guests} khách</span>
+                  <span>Tối đa {product.beds} khách</span>
                 </div>
 
                 {product.host.isSuperhost && (
@@ -858,7 +587,8 @@ export default function ProductDetail() {
             {/* Tabbed Navigation for Content */}
             <div className="mb-8">
               <div className="flex border-b border-gray-200 mb-6 overflow-x-auto hide-scrollbar">
-                <button
+                <motion.button
+                  whileHover={{ y: -2 }}
                   onClick={() => setActiveTab("description")}
                   className={`px-5 py-3 font-medium whitespace-nowrap ${
                     activeTab === "description"
@@ -867,8 +597,9 @@ export default function ProductDetail() {
                   }`}
                 >
                   Mô tả
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -2 }}
                   onClick={() => setActiveTab("amenities")}
                   className={`px-5 py-3 font-medium whitespace-nowrap ${
                     activeTab === "amenities"
@@ -877,8 +608,9 @@ export default function ProductDetail() {
                   }`}
                 >
                   Tiện nghi
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -2 }}
                   onClick={() => setActiveTab("reviews")}
                   className={`px-5 py-3 font-medium whitespace-nowrap ${
                     activeTab === "reviews"
@@ -887,8 +619,9 @@ export default function ProductDetail() {
                   }`}
                 >
                   Đánh giá ({product.reviews.length})
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -2 }}
                   onClick={() => setActiveTab("location")}
                   className={`px-5 py-3 font-medium whitespace-nowrap ${
                     activeTab === "location"
@@ -897,7 +630,7 @@ export default function ProductDetail() {
                   }`}
                 >
                   Vị trí
-                </button>
+                </motion.button>
               </div>
 
               {/* Tab Content */}
@@ -1165,109 +898,10 @@ export default function ProductDetail() {
 
           {/* Right Column - Booking Card */}
           <div>
-            <div className="sticky top-24">
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <span className="text-2xl font-bold">₫{product.price}</span>
-                    <span className="text-gray-600"> / đêm</span>
-                  </div>
-                  <div className="flex items-center">
-                    <FaStar className="text-yellow-400 mr-1" />
-                    <span className="font-medium">{product.rating}</span>
-                    <span className="mx-1 text-gray-400">·</span>
-                    <span className="text-gray-600 underline cursor-pointer">
-                      {product.totalRatings} đánh giá
-                    </span>
-                  </div>
-                </div>
-
-                {/* Date and Guest Selector */}
-                <div className="mb-6">
-                  <div className="grid grid-cols-2 rounded-t-xl overflow-hidden border border-gray-300">
-                    <div
-                      className="p-3 border-r border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => setShowBookingModal(true)}
-                    >
-                      <div className="text-xs font-medium text-gray-500">
-                        NHẬN PHÒNG
-                      </div>
-                      <div className="font-medium">
-                        {booking.dateRange.startDate.toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div
-                      className="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => setShowBookingModal(true)}
-                    >
-                      <div className="text-xs font-medium text-gray-500">
-                        TRẢ PHÒNG
-                      </div>
-                      <div className="font-medium">
-                        {booking.dateRange.endDate.toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="p-3 border border-t-0 border-gray-300 rounded-b-xl cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => setShowBookingModal(true)}
-                  >
-                    <div className="text-xs font-medium text-gray-500">
-                      KHÁCH
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="font-medium">{booking.guests} khách</div>
-                      <svg
-                        className="w-4 h-4 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Book Button */}
-                <button
-                  onClick={() => setShowBookingModal(true)}
-                  className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-rose-200 hover:shadow-rose-300 mb-4"
-                >
-                  Đặt phòng
-                </button>
-
-                {/* Price breakdown */}
-                <div className="space-y-3 text-gray-600 mt-4">
-                  <div className="flex justify-between">
-                    <span className="underline">
-                      ₫{product.price} x {nightCount} đêm
-                    </span>
-                    <span>₫{totalPrice}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="underline">Phí dịch vụ</span>
-                    <span>₫{serviceFee}</span>
-                  </div>
-                  <div className="border-t pt-3 mt-3 flex justify-between font-bold text-black">
-                    <span>Tổng trước thuế</span>
-                    <span>₫{totalWithFees}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 p-4 bg-rose-50 rounded-xl border border-rose-100">
-                <p className="text-rose-600 text-sm text-center">
-                  Đây là chỗ ở được đặt nhiều. Đặt ngay kẻo hết!
-                </p>
-              </div>
-            </div>
+            <BookingSummary
+              product={product}
+              setShowBookingModal={setShowBookingModal}
+            />
           </div>
         </div>
       </div>
@@ -1304,7 +938,11 @@ export default function ProductDetail() {
       </div>
 
       {/* Render the booking modal */}
-      <BookingModal />
+      <BookingForm
+        product={product}
+        showBookingModal={showBookingModal}
+        setShowBookingModal={setShowBookingModal}
+      />
 
       {/* Gallery Modal */}
       <GalleryModal />

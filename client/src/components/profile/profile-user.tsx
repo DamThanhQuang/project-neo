@@ -222,6 +222,7 @@ const ProfileUser = () => {
         console.error("Missing profile ID or token");
         return;
       }
+      const userId = Cookies.get("userId");
 
       // Tạo form data
       const formData = new FormData();
@@ -229,7 +230,7 @@ const ProfileUser = () => {
 
       console.log("Uploading avatar...");
 
-      const response = await axios.put(`user/${profile.id}/avatar`, formData, {
+      const response = await axios.put(`user/avatar/${userId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

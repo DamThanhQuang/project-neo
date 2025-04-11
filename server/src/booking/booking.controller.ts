@@ -16,8 +16,8 @@ import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  @Post('create')
   @UseGuards(JwtAuthGuard)
+  @Post('create')
   create(@Body() createBookingDto: CreateBookingDto, @Req() req) {
     return this.bookingService.create(createBookingDto, req.user.id);
   }

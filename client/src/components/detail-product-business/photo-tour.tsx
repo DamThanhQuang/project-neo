@@ -30,7 +30,6 @@ const isValidImageUrl = (url: string): boolean => {
 const fetchImages = async (id: string): Promise<PhotoTourResponse> => {
   try {
     const token = Cookies.get("token");
-    console.log("Đang tải ảnh với ID:", id);
 
     const response = await axios.get(`/business/detail-product/${id}`, {
       headers: {
@@ -38,21 +37,11 @@ const fetchImages = async (id: string): Promise<PhotoTourResponse> => {
       },
     });
 
-    console.log("Response API:", response.data);
-
     // Kiểm tra cấu trúc dữ liệu
     if (!response.data || !response.data.images) {
       console.warn("API không trả về dữ liệu images hợp lệ");
       return { images: [] };
     }
-
-    // Khảo sát cấu trúc dữ liệu
-    console.log(
-      "Cấu trúc của images:",
-      Array.isArray(response.data.images)
-        ? "Là mảng"
-        : typeof response.data.images
-    );
 
     // Nếu images không phải mảng, thử chuyển đổi
     let images = response.data.images;
@@ -68,9 +57,6 @@ const fetchImages = async (id: string): Promise<PhotoTourResponse> => {
         images = [];
       }
     }
-
-    // Log để debug
-    console.log("Danh sách URLs:", images);
 
     return { images };
   } catch (error) {
@@ -105,15 +91,6 @@ export default function PhotoTour({
       .then((data) => {
         // Lọc bỏ các URL không hợp lệ
         const validImages = (data.images || []).filter(isValidImageUrl);
-
-        console.log("Tổng số ảnh từ API:", data.images?.length || 0);
-        console.log("Số ảnh hợp lệ:", validImages.length);
-
-        if (validImages.length === 0) {
-          console.log("Không có ảnh nào hợp lệ từ API");
-        } else {
-          console.log("URL ảnh đầu tiên:", validImages[0]);
-        }
 
         setImages(validImages);
       })

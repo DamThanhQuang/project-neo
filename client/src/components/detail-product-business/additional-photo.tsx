@@ -60,8 +60,6 @@ const AdditionalPhoto = ({
         contentType: file.type,
       });
 
-      console.log("Response data:", res.data);
-
       const data = res.data;
       const { url: presignedUrl, key } = data;
 

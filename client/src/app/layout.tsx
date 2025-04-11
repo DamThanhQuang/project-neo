@@ -3,6 +3,7 @@ import { Quicksand } from "next/font/google";
 import "./globals.css";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import ConditionalHeader from "@/components/layout/conditionalHeader";
 
 const fontSans = Quicksand({
   subsets: ["latin"],
@@ -20,13 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <body className={fontSans.className}>
-        <div className={"min-h-screen flex flex-col justify-between"}>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </div>
+        <ConditionalHeader />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

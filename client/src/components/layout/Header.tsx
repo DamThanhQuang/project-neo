@@ -131,7 +131,7 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/home" className="flex items-center">
               <Image
-                src="https://static.tacdn.com/img2/brand_refresh/Tripadvisor_lockup_horizontal_secondary_registered.svg"
+                src="https://img.icons8.com/?size=100&id=UH55vOLfw0MO&format=png&color=000000"
                 alt="Tripadvisor Logo"
                 width={180}
                 height={40}

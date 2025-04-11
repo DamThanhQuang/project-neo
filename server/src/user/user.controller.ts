@@ -31,7 +31,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id/avatar')
+  @Put('avatar/:id')
   updateAvatar(@Param('id') id: string, @Body() avatar: string) {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid ID format');

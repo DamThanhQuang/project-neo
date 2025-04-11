@@ -177,8 +177,20 @@ export class BusinessService {
     }
 
     try {
+      // Đầu tiên tìm doanh nghiệp liên quan đến người dùng này
+      const business = await this.businessModel.findOne({
+        userId: new Types.ObjectId(userId),
+      });
+
+      if (!business) {
+        throw new NotFoundException(
+          `Business not found for user id: ${userId}`,
+        );
+      }
+
+      // Sau đó tìm sản phẩm dựa trên ID doanh nghiệp
       const products = await this.productModel
-        .find({ businessId: new Types.ObjectId(userId) })
+        .find({ businessId: business._id })
         .lean();
 
       if (!products || products.length === 0) {
