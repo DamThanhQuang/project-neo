@@ -114,6 +114,34 @@ export default function List() {
             Quản lý và theo dõi tất cả các căn hộ, nhà và phòng cho thuê của bạn
             tại đây
           </p>
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-6"
+          >
+            <Link
+              href={"/host/become-host"}
+              className="inline-block px-6 py-3 bg-rose-500 text-white font-semibold rounded-full hover:bg-rose-600 transition-colors duration-300 shadow-md hover:shadow-lg"
+            >
+              <span className="flex items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 2a8 8 0 100 16 8 8 0 000-16zm1.5 11.5a.5.5 0 01-.5.5h-3a.5.5 0 01-.5-.5v-3a.5.5 0 01.5-.5h3a.5.5 0 01.5.5v3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Tạo mục cho thuê mới
+              </span>
+            </Link>
+          </motion.div>
         </motion.header>
 
         {products.length > 0 ? (
@@ -124,7 +152,7 @@ export default function List() {
             className="w-full max-w-6xl"
           >
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-              <div className="px-6 py-4 border-b border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-100 ">
                 <h2 className="text-xl font-semibold text-gray-800">
                   Mục cho thuê
                 </h2>

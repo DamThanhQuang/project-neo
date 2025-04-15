@@ -8,6 +8,9 @@ import Title from "../title";
 import { motion, AnimatePresence } from "framer-motion";
 import AdditionalPhoto from "../additional-photo";
 import PropertyType from "../property-type";
+import { FetchNumberOfGuest } from "../number-of-guest";
+import { UpdateDescription } from "../update-description";
+import { Comfort } from "../comfort";
 
 export default function ListingSetup() {
   const router = useRouter();
@@ -25,6 +28,12 @@ export default function ListingSetup() {
       setActiveContent("property-type");
     } else if (pathname && pathname.includes("/details/additional-photos")) {
       setActiveContent("additional-photos");
+    } else if (pathname && pathname.includes("details/number-of-guest")) {
+      setActiveContent("number-of-guest");
+    } else if (pathname && pathname.includes("details/update-description")) {
+      setActiveContent("update-description");
+    } else if (pathname && pathname.includes("details/comfort")) {
+      setActiveContent("comfort");
     } else {
       setActiveContent("photo-tour");
     }
@@ -37,8 +46,19 @@ export default function ListingSetup() {
       router.push(`/host/dashboard/listing/${listingId}/details/title`);
     } else if (contentType === "property-type") {
       router.push(`/host/dashboard/listing/${listingId}/details/property-type`);
+    } else if (contentType === "number-of-guest") {
+      router.push(
+        `/host/dashboard/listing/${listingId}/details/number-of-guest`
+      );
+    } else if (contentType === "update-description") {
+      router.push(
+        `/host/dashboard/listing/${listingId}/details/update-description`
+      );
+    } else if (contentType === "comfort") {
+      router.push(`/host/dashboard/listing/${listingId}/details/comfort`);
+    } else {
+      setActiveContent(contentType);
     }
-    setActiveContent(contentType);
   };
 
   const renderRightContent = () => {
@@ -67,6 +87,15 @@ export default function ListingSetup() {
         );
       case "property-type":
         return <PropertyType />;
+
+      case "number-of-guest":
+        return <FetchNumberOfGuest />;
+
+      case "update-description":
+        return <UpdateDescription />;
+
+      case "comfort":
+        return <Comfort />;
 
       default:
         return <PhotoTour onNavigate={(url: string) => router.push(url)} />;
@@ -228,18 +257,14 @@ export default function ListingSetup() {
                 }}
               >
                 <h3 className="font-medium mb-2">Tiêu đề</h3>
-                <motion.button
-                  className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Xem
-                </motion.button>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Chỉnh sửa tiêu đề của bạn
+                </h3>
               </motion.div>
 
               {/* Property Type Section */}
               <motion.div
-                className="border border-gray-200 rounded-lg p-4 cursor-pointer"
+                className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer"
                 onClick={() => handleContentChange("property-type")}
                 whileHover={{
                   backgroundColor: "rgba(0,0,0,0.02)",
@@ -249,6 +274,45 @@ export default function ListingSetup() {
                 <h3 className="font-medium mb-2">Loại chỗ ở</h3>
                 <h3 className="text-sm font-medium text-gray-500">
                   Toàn bộ nhà - Nhà
+                </h3>
+              </motion.div>
+              <motion.div
+                className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer"
+                onClick={() => handleContentChange("number-of-guest")}
+                whileHover={{
+                  backgroundColor: "rgba(0,0,0,0.02)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
+              >
+                <h3 className="font-medium mb-2">Số lượng khách</h3>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Số lượng khách hàng
+                </h3>
+              </motion.div>
+              <motion.div
+                className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer"
+                onClick={() => handleContentChange("description")}
+                whileHover={{
+                  backgroundColor: "rgba(0,0,0,0.02)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
+              >
+                <h3 className="font-medium mb-2">Mô tả</h3>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Cung cấp thêm mô tả của bạn
+                </h3>
+              </motion.div>
+              <motion.div
+                className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer"
+                onClick={() => handleContentChange("comfort")}
+                whileHover={{
+                  backgroundColor: "rgba(0,0,0,0.02)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                }}
+              >
+                <h3 className="font-medium mb-2">Tiện nghi</h3>
+                <h3 className="text-sm font-meidum text-gray-500">
+                  Cung cấp - Chỉnh sửa tiện nghi của bạn
                 </h3>
               </motion.div>
             </div>
