@@ -173,4 +173,31 @@ export class ProductService {
   async findByUser(userId: string) {
     return this.productModel.find({ userId }).sort({ createdAt: -1 }).exec();
   }
+
+  async updateDescription(
+    id: string,
+    updateDescriptionDto: UpdateProductDto,
+  ): Promise<Product> {
+    try {
+      const product = await this.productModel.findOneAndUpdate(
+        { _id: new Types.ObjectId(id) },
+        { $set: updateDescriptionDto },
+        { new: true },
+      );
+
+      if (!product) {
+        throw this.errorService.notFound('Product', id);
+      }
+
+      return product;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw this.errorService.serverError('Error updating product', {
+        productId: id,
+        error,
+      });
+    }
+  }
 }

@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Get, UseGuards, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Param,
+  Put,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { AddReviewDto } from './dto/add-review.dto';
 import { Public } from '@/auth/decorators/customs.decorator';
 import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('product')
 export class ProductController {
@@ -32,5 +42,14 @@ export class ProductController {
   async getProduct(@Param('id') id: string) {
     console.log('Product ID:', id);
     return this.productService.findProductById(id);
+  }
+
+  @Put('update-description/:id')
+  @Public()
+  async updateDescription(
+    @Param('id') id: string,
+    @Body() updateDescriptionDto: UpdateProductDto,
+  ) {
+    return this.productService.updateDescription(id, updateDescriptionDto);
   }
 }

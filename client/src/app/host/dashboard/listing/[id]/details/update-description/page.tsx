@@ -1,7 +1,7 @@
 import { UpdateDescription } from "@/components/detail-product-business/update-description";
 
-const DescriptionPage = () => {
-  return <UpdateDescription />;
+const UpdateDescriptionPage = () => {
+  return <UpdateDescription productId="some-product-id" />;
 };
 
-export default DescriptionPage;
+export default UpdateDescriptionPage;

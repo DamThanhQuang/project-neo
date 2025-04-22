@@ -1,17 +1,60 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
+
+// Tạo class con cho phần description
+class Description {
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsString()
+  @IsOptional()
+  descriptionDetail: string;
+
+  @IsString()
+  @IsOptional()
+  guestsAmenities: string;
+
+  @IsString()
+  @IsOptional()
+  interactionWithGuests: string;
+
+  @IsString()
+  @IsOptional()
+  otherThingsToNote: string;
+}
 
 export class UpdateProductDto {
   @IsString()
-  @IsNotEmpty()
-  title: string;
-  description: string;
-  price: number;
+  @IsOptional()
+  title?: string;
 
-  @IsNotEmpty()
-  images: string[];
+  @IsObject()
+  @ValidateNested()
+  @Type(() => Description)
+  @IsOptional()
+  description?: Description;
 
-  propertyType: string;
-  location: {
+  @IsNumber()
+  @IsOptional()
+  price?: number;
+
+  @IsOptional()
+  images?: string[];
+
+  @IsString()
+  @IsOptional()
+  propertyType?: string;
+
+  @IsObject()
+  @IsOptional()
+  location?: {
     address: string;
     apartment?: string;
     district: string;
@@ -19,10 +62,27 @@ export class UpdateProductDto {
     country: string;
     postalCode?: string;
   };
-  amenities: string[];
-  privacyType: 'entire_place' | 'private_room' | 'shared_room' | 'public';
-  livingRooms: number;
-  bedrooms: number;
-  beds: number;
-  bathrooms: number;
+
+  @IsOptional()
+  amenities?: string[];
+
+  @IsString()
+  @IsOptional()
+  privacyType?: 'entire_place' | 'private_room' | 'shared_room' | 'public';
+
+  @IsNumber()
+  @IsOptional()
+  livingRooms?: number;
+
+  @IsNumber()
+  @IsOptional()
+  bedrooms?: number;
+
+  @IsNumber()
+  @IsOptional()
+  beds?: number;
+
+  @IsNumber()
+  @IsOptional()
+  bathrooms?: number;
 }

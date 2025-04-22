@@ -58,13 +58,13 @@ export const FetchNumberOfGuest = () => {
             damping: 20,
             delay: i * 0.05,
           }}
-          className="inline-block m-0 relative"
+          className="inline-block -m-1 relative"
         >
           <Image
             src={imageUrl}
             alt={`Guest Icon ${i + 1}`}
-            width={150}
-            height={150}
+            width={80}
+            height={80}
             className="drop-shadow-md hover:scale-110 transition-transform"
           />
         </motion.div>
@@ -92,7 +92,7 @@ export const FetchNumberOfGuest = () => {
         Number of Guests
       </h2>
 
-      <div className="mb-8 flex flex-wrap justify-center gap-0 p-4 bg-gray-50 rounded-xl w-full">
+      <div className="mb-8 flex flex-wrap justify-center gap-0 p-2 bg-gray-50 rounded-xl w-full overflow-hidden">
         <AnimatePresence>{guestImages()}</AnimatePresence>
       </div>
 

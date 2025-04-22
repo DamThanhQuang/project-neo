@@ -5,9 +5,14 @@ export class CreateProductDto {
   @IsNotEmpty()
   title: string;
 
-  @IsString()
   @IsNotEmpty()
-  description: string;
+  description: {
+    description: string; // Mô tả ngắn về chỗ ở của bạn
+    descriptionDetail: string; // Mô tả chi tiết về chỗ ở của bạn
+    guestsAmenities: string; // Tiện nghi cho khách
+    interactionWithGuests: string; // Tương tác với khách
+    otherThingsToNote: string; // Những điều khác cần lưu ý
+  };
 
   @IsNumber()
   @IsNotEmpty()
@@ -36,7 +41,6 @@ export class CreateProductDto {
   @IsNotEmpty()
   amenities: string[];
 
-  @IsNotEmpty()
   @IsNotEmpty()
   privacyType: 'entire_place' | 'private_room' | 'shared_room' | 'public';
 

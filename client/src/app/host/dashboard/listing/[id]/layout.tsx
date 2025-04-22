@@ -4,7 +4,6 @@ const DetailsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div>
       <ListingSetupPage />
-      {/* <main>{children}</main> */}
     </div>
   );
 };

@@ -14,8 +14,14 @@ export class Product {
   @Prop({ required: true })
   propertyType: string; // Apartment, House, Villa, ...
 
-  @Prop({ required: true })
-  description: string;
+  @Prop({ type: Object, required: true })
+  description: {
+    description: string; // Mô tả ngắn về chỗ ở của bạn
+    descriptionDetail: string; // Mô tả chi tiết về chỗ ở của bạn
+    guestsAmenities: string; // Tiện nghi cho khách
+    interactionWithGuests: string; // Tương tác với khách
+    otherThingsToNote: string; // Những điều khác cần lưu ý
+  };
 
   @Prop({ required: true })
   price: number;

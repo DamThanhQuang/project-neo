@@ -77,30 +77,30 @@ export default function Title() {
   };
 
   if (isFetching) {
-    return <div className="p-4">Đang tải thông tin...</div>;
+    return <div className="p-4 text-center">Đang tải thông tin...</div>;
   }
 
   return (
-    <div>
+    <div className="flex flex-col items-center align-center py-4 px-2">
       <h2 className="text-2xl font-semibold mb-6">Tiêu đề</h2>
 
-      <div className="mb-6">
+      <div className="mb-6 max-w-3xl mx-auto text-center">
         <p className="text-gray-600 mb-4">
           Tiêu đề nên mô tả ngắn gọn điểm đặc biệt của chỗ ở bạn. Tránh nhắc đến
           vị trí vì sẽ được hiển thị riêng.
         </p>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <form onSubmit={handleSubmit} className="flex flex-col items-center">
+          <div className="mb-4 w-full">
             <textarea
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-4 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              className="w-full p-4 text-lg text-center bg-transparent border-none focus:outline-none focus:ring-0 resize-none"
               rows={3}
               placeholder="Ví dụ: Căn hộ hiện đại và đầy đủ tiện nghi với ban công view thành phố"
             ></textarea>
             <p className="text-sm text-gray-500 mt-2">
-              {title.length}/32 ký tự
+              {title.length}/64 ký tự
             </p>
           </div>
 

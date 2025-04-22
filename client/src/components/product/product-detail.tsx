@@ -7,29 +7,21 @@ import {
   FaHeart,
   FaShare,
   FaMapMarkerAlt,
-  FaUser,
   FaChevronLeft,
   FaChevronRight,
-  FaWifi,
-  FaParking,
-  FaSnowflake,
-  FaShower,
-  FaCoffee,
-  FaTv,
-  FaUtensils,
-  FaCheck,
-  FaRegCalendarAlt,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "@/lib/axios";
-import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import Cookies from "js-cookie";
-import BookingForm, {
-  useBookingCalculations,
-} from "@/components/booking/BookingForm";
+import BookingForm from "@/components/booking/BookingForm";
 import BookingSummary from "@/components/booking/BookingSummary";
+import ProductDescription from "./ProductDescription";
+import ProductAmenities, { getAmenityIcon } from "./ProductAmenities";
+import ProductReviews from "./ProductReviews";
+import ProductLocation from "./ProductLocation";
+import ProductHost from "./ProductHost";
 
 interface Rating {
   stars: number;
@@ -53,7 +45,12 @@ interface Product {
   id: number;
   image: string[];
   title: string;
-  description: string;
+  description: {
+    description: string;
+    descriptionDetail: string;
+    guestsAmenities: string;
+    interactionWithGuests: string;
+  };
   price: number;
   location: {
     address: string;
@@ -77,23 +74,6 @@ interface Product {
   averageRating: number;
 }
 
-const getAmenityIcon = (amenity: string) => {
-  const amenityLower = amenity.toLowerCase();
-  if (amenityLower.includes("wifi")) return <FaWifi />;
-  if (amenityLower.includes("parking")) return <FaParking />;
-  if (amenityLower.includes("air") || amenityLower.includes("ac"))
-    return <FaSnowflake />;
-  if (amenityLower.includes("shower") || amenityLower.includes("bath"))
-    return <FaShower />;
-  if (amenityLower.includes("coffee") || amenityLower.includes("breakfast"))
-    return <FaCoffee />;
-  if (amenityLower.includes("tv") || amenityLower.includes("television"))
-    return <FaTv />;
-  if (amenityLower.includes("kitchen") || amenityLower.includes("dining"))
-    return <FaUtensils />;
-  return <FaCheck />;
-};
-
 export default function ProductDetail() {
   const params = useParams();
   const router = useRouter();
@@ -103,8 +83,6 @@ export default function ProductDetail() {
   const [isError, setIsError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [showAlternateHeader, setShowAlternateHeader] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("description");
@@ -115,25 +93,6 @@ export default function ProductDetail() {
     setIsFavorite(!isFavorite);
     // Could add API call to save favorite status
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setShowAlternateHeader(true);
-      } else {
-        setShowAlternateHeader(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [lastScrollY]);
 
   // Outside click handler for gallery
   useEffect(() => {
@@ -179,7 +138,12 @@ export default function ProductDetail() {
           id: productData._id,
           image: productData.images || [productData.image || ""],
           title: productData.name || "Product Name",
-          description: productData.description || "No description available",
+          description: productData.description || {
+            description: "Product Description",
+            descriptionDetail: "Product Details",
+            guestsAmenities: "Guest Amenities",
+            interactionWithGuests: "Interaction with Guests",
+          },
           price: productData.price || 0,
           location: productData.location || {
             address: "N/A",
@@ -414,43 +378,7 @@ export default function ProductDetail() {
 
   return (
     <>
-      {/* Main Header - Shows when scrolling up or at top */}
-      <header
-        className={`fixed top-0 left-0 w-full bg-white shadow-sm z-40 transition-transform duration-300 ${
-          showAlternateHeader ? "-translate-y-full" : "translate-y-0"
-        }`}
-      ></header>
-
-      {/* Alternate Header - Shows when scrolling down */}
-      <header
-        className={`fixed top-0 left-0 w-full bg-white shadow-md z-40 transition-transform duration-300 ${
-          showAlternateHeader ? "translate-y-0" : "-translate-y-full"
-        }`}
-      >
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <h2 className="text-lg font-medium">
-              ₫{product.price}{" "}
-              <span className="text-sm font-normal text-gray-600">/ đêm</span>
-            </h2>
-            <div className="flex items-center">
-              <FaStar className="text-yellow-400" />
-              <span className="ml-1 font-medium">{product.rating}</span>
-              <span className="ml-1 text-gray-500">
-                ({product.reviews.length} đánh giá)
-              </span>
-            </div>
-          </div>
-          <button
-            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 transition-all duration-300 text-white px-6 py-2 rounded-full font-semibold shadow-lg shadow-rose-200 hover:shadow-rose-300"
-            onClick={() => setShowBookingModal(true)}
-          >
-            Đặt phòng
-          </button>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 pt-20 md:pt-15 pb-16 max-w-7xl">
+      <div className="container mx-auto px-4 pt-10 md:pt-8 pb-16 max-w-7xl">
         {/* Product Title & Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900">
@@ -631,267 +559,48 @@ export default function ProductDetail() {
                 >
                   Vị trí
                 </motion.button>
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  onClick={() => setActiveTab("host")}
+                  className={`px-5 py-3 font-medium whitespace-nowrap ${
+                    activeTab === "host"
+                      ? "border-b-2 border-gray-800 text-gray-800"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Chủ nhà
+                </motion.button>
               </div>
 
               {/* Tab Content */}
               <div className="min-h-[300px]">
                 {/* Description Tab */}
                 {activeTab === "description" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl font-semibold mb-4">Về nơi này</h3>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line mb-6">
-                      {product.description}
-                    </p>
-
-                    <div className="p-6 bg-gray-50 rounded-xl border border-gray-100 mt-6">
-                      <h4 className="font-semibold mb-3">Quy tắc chỗ ở</h4>
-                      <ul className="space-y-2 text-gray-700">
-                        <li className="flex items-start">
-                          <svg
-                            className="mr-2 w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                          </svg>
-                          <span>Nhận phòng sau 14:00</span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            className="mr-2 w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                          </svg>
-                          <span>Trả phòng trước 12:00</span>
-                        </li>
-                        <li className="flex items-start">
-                          <svg
-                            className="mr-2 w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                            ></path>
-                          </svg>
-                          <span>Không hút thuốc</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </motion.div>
+                  <ProductDescription description={product.description} />
                 )}
 
                 {/* Amenities Tab */}
                 {activeTab === "amenities" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <h3 className="text-xl font-semibold mb-6">
-                      Tiện nghi tại chỗ ở
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
-                      {product.amenities.map((amenity, index) => (
-                        <div key={index} className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-700">
-                            {getAmenityIcon(amenity)}
-                          </div>
-                          <span className="text-gray-800">{amenity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
+                  <ProductAmenities amenities={product.amenities} />
                 )}
 
                 {/* Reviews Tab */}
                 {activeTab === "reviews" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="flex flex-col md:flex-row gap-8 mb-8">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold mb-4">
-                          <div className="flex items-center gap-2">
-                            <FaStar className="text-yellow-400" />
-                            <span>{product.averageRating}</span>
-                            <span className="text-gray-700">·</span>
-                            <span>{product.totalRatings} đánh giá</span>
-                          </div>
-                        </h3>
-
-                        <div className="space-y-2">
-                          {product.ratings.map((rating) => (
-                            <div
-                              key={rating.stars}
-                              className="flex items-center gap-2"
-                            >
-                              <span className="w-1 text-gray-600">
-                                {rating.stars}
-                              </span>
-                              <div className="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-yellow-400 rounded-full"
-                                  style={{ width: `${rating.percentage}%` }}
-                                ></div>
-                              </div>
-                              <span className="w-8 text-right text-gray-500 text-sm">
-                                {rating.count}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="md:w-64 p-6 bg-yellow-50 rounded-xl flex flex-col items-center justify-center">
-                        <div className="font-bold text-4xl text-yellow-600 mb-2">
-                          {product.averageRating}
-                        </div>
-                        <div className="flex mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar
-                              key={i}
-                              className={
-                                i < Math.floor(product.averageRating)
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
-                              }
-                            />
-                          ))}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Trên tổng số {product.totalRatings} đánh giá
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Review List */}
-                    <div className="mt-8 space-y-8">
-                      {product.reviews.map((review) => (
-                        <motion.div
-                          key={review.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5 }}
-                          className="p-6 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex items-start">
-                            <img
-                              src={review.user.image}
-                              alt={review.user.name}
-                              className="w-12 h-12 rounded-full mr-4 object-cover"
-                            />
-                            <div>
-                              <h4 className="font-medium text-gray-900">
-                                {review.user.name}
-                              </h4>
-                              <div className="flex items-center mt-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <FaStar
-                                    key={i}
-                                    className={
-                                      i < review.rating
-                                        ? "text-yellow-400 w-4 h-4"
-                                        : "text-gray-300 w-4 h-4"
-                                    }
-                                  />
-                                ))}
-                                <span className="ml-2 text-sm text-gray-500">
-                                  {review.date}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 text-gray-700 whitespace-pre-line">
-                            {review.title && (
-                              <p className="font-medium mb-1">{review.title}</p>
-                            )}
-                            {review.comment}
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
+                  <ProductReviews
+                    reviews={product.reviews}
+                    ratings={product.ratings}
+                    averageRating={product.averageRating}
+                    totalRatings={product.totalRatings}
+                  />
                 )}
 
                 {/* Location Tab */}
                 {activeTab === "location" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
-                    <h3 className="text-xl font-semibold mb-3">Vị trí</h3>
-                    <p className="text-gray-700">
-                      {product.location.address}, {product.location.city},{" "}
-                      {product.location.country}
-                    </p>
-
-                    <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center p-8">
-                          <FaMapMarkerAlt className="mx-auto text-4xl text-gray-400 mb-2" />
-                          <p className="text-gray-600">
-                            Bản đồ hiện chưa được tải
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 bg-gray-50 rounded-xl border border-gray-100 mt-4">
-                      <h4 className="font-semibold mb-3">Khám phá khu vực</h4>
-                      <ul className="space-y-3">
-                        <li className="flex justify-between">
-                          <span className="text-gray-700">
-                            Trung tâm thành phố
-                          </span>
-                          <span className="text-gray-900 font-medium">
-                            2 km
-                          </span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-gray-700">
-                            Sân bay gần nhất
-                          </span>
-                          <span className="text-gray-900 font-medium">
-                            15 km
-                          </span>
-                        </li>
-                        <li className="flex justify-between">
-                          <span className="text-gray-700">Bãi biển</span>
-                          <span className="text-gray-900 font-medium">
-                            500 m
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-                  </motion.div>
+                  <ProductLocation location={product.location} />
                 )}
+
+                {/* Host Tab */}
+                {activeTab === "host" && <ProductHost host={product.host} />}
               </div>
             </div>
           </div>

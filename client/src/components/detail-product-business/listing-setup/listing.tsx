@@ -92,7 +92,7 @@ export default function ListingSetup() {
         return <FetchNumberOfGuest />;
 
       case "update-description":
-        return <UpdateDescription />;
+        return <UpdateDescription productId={listingId || ""} />;
 
       case "comfort":
         return <Comfort />;
@@ -105,9 +105,9 @@ export default function ListingSetup() {
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content */}
-      <div className="flex flex-col md:flex-row">
-        {/* Left Sidebar */}
-        <div className="w-full md:w-1/3 max-w-md border-b md:border-b-0 md:border-r border-gray-200 p-6">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-0">
+        {/* Left Sidebar with scroll */}
+        <div className="w-full md:w-1/3 max-w-md border-b md:border-b-0 md:border-r border-gray-200 p-6 md:h-screen md:overflow-y-auto md:sticky md:top-0">
           <div>
             <Link
               href="/listing"
@@ -291,7 +291,7 @@ export default function ListingSetup() {
               </motion.div>
               <motion.div
                 className="border border-gray-200 rounded-lg p-4 mb-4 cursor-pointer"
-                onClick={() => handleContentChange("description")}
+                onClick={() => handleContentChange("update-description")}
                 whileHover={{
                   backgroundColor: "rgba(0,0,0,0.02)",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
@@ -323,7 +323,7 @@ export default function ListingSetup() {
         <AnimatePresence mode="wait">
           <motion.div
             key={activeContent}
-            className="w-full md:w-2/3 p-6"
+            className="w-full md:w-2/3 p-6 md:h-screen md:overflow-y-auto md:sticky md:top-0 md:right-0"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}

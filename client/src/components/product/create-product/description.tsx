@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { MdOutlineCabin, MdDescription } from "react-icons/md";
+import { MdOutlineCabin } from "react-icons/md";
 import { FaLightbulb } from "react-icons/fa";
-import { title } from "process";
 
 export default function Description() {
   const router = useRouter();
@@ -19,11 +18,18 @@ export default function Description() {
     try {
       const savedDescription = localStorage.getItem("description");
       if (savedDescription) {
-        const savedData = JSON.parse(savedDescription);
-        if (savedData.description) {
-          setDescription(savedData.description);
-          setIsComplete(true);
+        // Kiểm tra xem dữ liệu có phải là JSON hay không
+        if (savedDescription.startsWith("{")) {
+          // Nếu là JSON, xử lý theo cách cũ
+          const savedData = JSON.parse(savedDescription);
+          if (savedData.description) {
+            setDescription(savedData.description);
+          }
+        } else {
+          // Nếu là chuỗi đơn giản, gán trực tiếp
+          setDescription(savedDescription);
         }
+        setIsComplete(true);
       }
     } catch (error) {
       console.error("Get saved data error:", error);
@@ -32,7 +38,7 @@ export default function Description() {
 
   useEffect(() => {
     setIsComplete(description.length > 0 && description.length <= maxLength);
-  }, [title]);
+  }, [description]);
 
   // Tính số ký tự đã nhập
   const charCount = description.length;
@@ -91,13 +97,15 @@ export default function Description() {
   const handleNext = () => {
     if (!isValid) return;
 
-    // Lưu mô tả vào localStorage
     try {
-      localStorage.setItem("description", JSON.stringify({ description }));
-      // Lưu mô tả và chuyển trang
+      setIsLoading(true);
+      localStorage.setItem("description", description);
+
+      // Chuyển trang
       router.push("/create/finish-setup");
     } catch (error) {
       console.error("Save data error:", error);
+      setError("Đã xảy ra lỗi khi lưu mô tả. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
