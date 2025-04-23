@@ -20,6 +20,7 @@ import {
   FaConciergeBell,
   FaBell,
 } from "react-icons/fa";
+import { IoIosAirplane } from "react-icons/io";
 
 interface User {
   name: string;
@@ -256,6 +257,14 @@ export default function Header() {
                       Quản lý căn hộ, phòng cho thuê
                     </Link>
 
+                    <Link
+                      href="/trip"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <IoIosAirplane className="w-4 h-4 mr-3 text-gray-500" />
+                      Chuyến đi của bạn
+                    </Link>
+
                     <div className="border-t border-gray-100 my-1"></div>
 
                     <button
@@ -368,6 +377,13 @@ export default function Header() {
                 >
                   <FaBriefcase className="w-4 h-4 mr-3 text-gray-500" />
                   Quản lý căn hộ, phòng cho thuê
+                </Link>
+                <Link
+                  href="/trip"
+                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <IoIosAirplane className="w-4 h-4 mr-3 text-gray-500" />
+                  Chuyến đi của bạn
                 </Link>
 
                 <button

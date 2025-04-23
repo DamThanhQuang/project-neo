@@ -52,4 +52,11 @@ export class ProductController {
   ) {
     return this.productService.updateDescription(id, updateDescriptionDto);
   }
+
+  @Get('get-product-for-booking/:id')
+  @Public()
+  async getProductForBooking(@Param('id') id: string) {
+    console.log('Product ID:', id);
+    return this.productService.findById(id);
+  }
 }

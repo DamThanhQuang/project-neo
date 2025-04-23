@@ -89,4 +89,13 @@ export class UserController {
     }
     return user;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  async getUserById(@Param('id') id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    return this.userService.findById(id);
+  }
 }

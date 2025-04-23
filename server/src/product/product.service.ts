@@ -154,8 +154,25 @@ export class ProductService {
   async findOne(id: string) {
     return this.productModel.findById(id);
   }
+
   async findById(id: string) {
-    return this.productModel.findById(id);
+    try {
+      const product = await this.productModel
+        .findById(new Types.ObjectId(id))
+        .exec();
+      if (!product) {
+        throw this.errorService.notFound('Product', id);
+      }
+      return product;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw this.errorService.serverError('Error fetching product', {
+        productId: id,
+        error,
+      });
+    }
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, userId: string) {

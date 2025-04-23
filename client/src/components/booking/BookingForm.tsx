@@ -166,10 +166,20 @@ export default function BookingForm({
     if (!product) return;
 
     const token = Cookies.get("token");
+    const formattedToken = token?.startsWith("Bearer ")
+      ? token
+      : `Bearer ${token}`;
     if (!token) {
-      router.push("/login");
+      setBooking((prev) => ({
+        ...prev,
+        error: "Bạn cần đăng nhập để đặt phòng",
+      }));
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
       return;
     }
+    console.log("token", token);
 
     try {
       setBooking((prev) => ({ ...prev, isSubmitting: true, error: null }));
@@ -179,33 +189,37 @@ export default function BookingForm({
 
       // Chuẩn bị dữ liệu đặt phòng
       const bookingData = {
-        productId: product.id,
-        checkIn: booking.dateRange.startDate,
-        checkOut: booking.dateRange.endDate,
-        guests: booking.guests,
-        totalPrice: finalPrice,
-        // Thông tin thanh toán
-        paymentMethod: booking.paymentMethod,
-        installmentMonths: booking.installmentMonths,
-        // Thông tin đặt phòng nhóm
-        isGroupBooking: booking.isGroupBooking,
-        groupMembers: booking.groupMembers,
-        // Thông tin khuyến mãi
-        isLastMinute: isBookingLastMinute(),
-        // Thông tin điểm thưởng
-        usingLoyaltyPoints: booking.usingPoints,
-        loyaltyPointsUsed: booking.usingPoints
-          ? Math.min(1250, Math.round(totalWithFees * 0.1))
-          : 0,
-        loyaltyPointsEarned: Math.round(finalPrice * 0.05),
+        productId: product.id.toString(),
+        checkIn: booking.dateRange.startDate.toISOString(),
+        checkOut: booking.dateRange.endDate.toISOString(),
+        guests: Number(booking.guests),
+        totalPrice: Number(finalPrice),
+        // // Thông tin thanh toán
+        // paymentMethod: booking.paymentMethod,
+        // installmentMonths: booking.installmentMonths,
+        // // Thông tin đặt phòng nhóm
+        // isGroupBooking: booking.isGroupBooking,
+        // groupMembers: booking.groupMembers,
+        // // Thông tin khuyến mãi
+        // isLastMinute: isBookingLastMinute(),
+        // // Thông tin điểm thưởng
+        // usingLoyaltyPoints: booking.usingPoints,
+        // loyaltyPointsUsed: booking.usingPoints
+        //   ? Math.min(1250, Math.round(totalWithFees * 0.1))
+        //   : 0,
+        // loyaltyPointsEarned: Math.round(finalPrice * 0.05),
       };
 
-      const response = await axios.post("/bookings/create", bookingData, {
+      console.log("Booking data:", bookingData);
+
+      const response = await axios.post("/bookings", bookingData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: formattedToken,
+          "Content-Type": "application/json",
         },
+        withCredentials: true,
       });
-      console.log(response);
+      console.log("Booking response:", response);
 
       setBooking((prev) => ({
         ...prev,

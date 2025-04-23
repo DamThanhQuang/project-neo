@@ -1,4 +1,6 @@
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -64,11 +66,18 @@ export class UserService {
   }
 
   async findById(id: string): Promise<User> {
-    const user = await this.userModel.findById(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel.findById(new Types.ObjectId(id)).exec();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      return user;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching user');
     }
-    return user;
   }
 
   async updateAvatar(
