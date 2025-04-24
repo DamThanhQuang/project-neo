@@ -21,10 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={fontSans.className}>
+    <html lang="en" className="h-full">
+      <body className={`${fontSans.className} flex flex-col min-h-screen`}>
         <ConditionalHeader />
-        <main>{children}</main>
+        <main className="flex-grow">{children}</main>
         <Footer />
       </body>
     </html>

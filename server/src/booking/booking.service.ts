@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  HttpException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -108,36 +109,39 @@ export class BookingService {
   }
 
   async findAllByUser(userId: string) {
-    return this.bookingModel.find({ userId }).sort({ createdAt: -1 });
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('ID người dùng không hợp lệ');
+    }
+    try {
+      return this.bookingModel.find({ userId }).populate("productId").sort({ createdAt: -1 });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('Không tìm thấy đặt phòng');
+      }
+      throw new BadRequestException("Không thể lấy danh sách đặt phòng");
+    }
   }
 
-  async findOne(id: string, userId: string) {
+  async findOneById(id: string, userId: string) {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('ID đặt phòng không hợp lệ');
+    };
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('ID người dùng không hợp lệ');
     }
-
-    const booking = await this.bookingModel.findById(id);
-    if (!booking) {
-      throw new NotFoundException(`Không tìm thấy đặt phòng`);
-    }
-
-    if (booking.userId.toString() !== userId) {
-      throw new ForbiddenException('Bạn không có quyền xem đặt phòng này');
-    }
-
-    return booking;
+ try {
+  const booking = await this.bookingModel.findById(new Types.ObjectId(id), userId);
+  if (!booking) {
+    throw new NotFoundException('Không tìm thấy đặt phòng');
+  }
+  return booking;
+ } catch (error) {
+  if (error instanceof HttpException) {
+    throw error;
+  }
+  throw new BadRequestException('Không thể lấy thông tin đặt phòng');
+ }
   }
 
-  async cancel(id: string, userId: string) {
-    const booking = await this.findOne(id, userId);
 
-    // Kiểm tra đặt phòng có thể hủy
-    const currentDate = new Date();
-    if (new Date(booking.checkIn) <= currentDate) {
-      throw new BadRequestException('Không thể hủy đặt phòng đã bắt đầu');
-    }
-
-    booking.status = 'cancelled';
-    return booking.save();
-  }
 }

@@ -12,6 +12,7 @@ import {
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
+import { Types } from 'mongoose';
 
 @Controller('bookings')
 export class BookingController {
@@ -35,18 +36,18 @@ export class BookingController {
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req) {
-    return this.bookingService.findAllByUser(req.user.id);
+    const userId = req.user?._id;
+    return this.bookingService.findAllByUser(userId);
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string, @Req() req) {
-    return this.bookingService.findOne(id, req.user.id);
+@Get(':id')
+@UseGuards(JwtAuthGuard)
+async findOne(@Param('id') id:string, @Req() req) {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new Error(`Invalid ObjectId format: ${id}`);
   }
-
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  cancel(@Param('id') id: string, @Req() req) {
-    return this.bookingService.cancel(id, req.user.id);
-  }
+  const userId = req.user?._id;
+  const objectId = new Types.ObjectId(id);
+  return this.bookingService.findOneById(objectId.toString(), userId);
+}
 }
