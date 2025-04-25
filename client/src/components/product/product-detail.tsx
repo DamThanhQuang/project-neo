@@ -124,6 +124,7 @@ export default function ProductDetail() {
         }
 
         const response = await axios.get(`/product/get-product/${productId}`);
+        console.log("Product response:", response.data);
 
         if (response.status < 200 || response.status >= 300) {
           throw new Error("Failed to fetch product details");

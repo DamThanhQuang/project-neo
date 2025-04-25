@@ -13,6 +13,7 @@ import { BusinessModule } from './business/business.module';
 import { S3Module } from './aws/s3.module';
 import { ErrorService } from './common/services/error.service';
 import { BookingModule } from './booking/booking.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { BookingModule } from './booking/booking.module';
     ProductModule,
     BusinessModule,
     BookingModule,
+    MailModule,
   ],
   controllers: [AppController, ExampleController],
   providers: [

@@ -129,19 +129,36 @@ export class BookingService {
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('ID người dùng không hợp lệ');
     }
- try {
-  const booking = await this.bookingModel.findById(new Types.ObjectId(id), userId);
-  if (!booking) {
-    throw new NotFoundException('Không tìm thấy đặt phòng');
+    
+    try {
+      // Thêm log để debug
+      this.logger.log(`Đang tìm booking với ID: ${id} cho user: ${userId}`);
+      
+      // Kiểm tra xem booking có tồn tại không (không quan tâm userId)
+      const bookingExists = await this.bookingModel.findById(id);
+      if (!bookingExists) {
+        this.logger.warn(`Không tìm thấy booking với ID: ${id}`);
+        throw new NotFoundException('Không tìm thấy đặt phòng');
+      }
+      
+      // Nếu booking tồn tại nhưng không thuộc về user hiện tại
+      if (bookingExists.userId.toString() !== userId) {
+        this.logger.warn(`Booking thuộc về user: ${bookingExists.userId}, không phải ${userId}`);
+        throw new ForbiddenException('Bạn không có quyền truy cập đặt phòng này');
+      }
+      
+      // Tìm booking với đầy đủ thông tin
+      const booking = await this.bookingModel.findOne({
+        _id: new Types.ObjectId(id),
+        userId: new Types.ObjectId(userId)
+      }).populate("productId");
+      
+      return booking;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new BadRequestException('Không thể lấy thông tin đặt phòng');
+    }
   }
-  return booking;
- } catch (error) {
-  if (error instanceof HttpException) {
-    throw error;
-  }
-  throw new BadRequestException('Không thể lấy thông tin đặt phòng');
- }
-  }
-
-
 }

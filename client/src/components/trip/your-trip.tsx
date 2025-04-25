@@ -36,25 +36,35 @@ export const YourTrip = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
+        console.log("Bắt đầu tải dữ liệu đặt phòng");
         setLoading(true);
         // Lấy token từ localStorage
         const token = Cookies.get("token");
+        
+        console.log("Token có tồn tại:", !!token);
         
         if (!token) {
           router.push("/login");
           return;
         }
         
+        console.log("Đang gọi API...");
         const response = await axios.get("/bookings", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         
+        console.log("Nhận được dữ liệu:", response.data);
         setBookings(response.data);
         setLoading(false);
-      } catch (err) {
+        console.log("Đã tắt trạng thái loading");
+      } catch (err: any) {
         console.error("Lỗi khi lấy dữ liệu đặt phòng:", err);
+        // Hiển thị chi tiết lỗi hơn
+        if (err.response) {
+          console.error("Lỗi phản hồi:", err.response.status, err.response.data);
+        }
         setError("Không thể tải dữ liệu đặt phòng");
         setLoading(false);
       }
@@ -148,7 +158,7 @@ export const YourTrip = () => {
           <div 
             key={booking._id} 
             className="border border-gray-200 hover:border-gray-300 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg bg-white"
-            onClick={() => booking.status !== 'cancelled' && router.push(`/bookings/${booking._id}`)}
+            onClick={() => booking.status !== 'cancelled' && router.push(`/trip/${booking._id}/details`)}
             style={{ cursor: booking.status !== 'cancelled' ? 'pointer' : 'default' }}
           >
             <div className="flex flex-col md:flex-row">
@@ -214,7 +224,7 @@ export const YourTrip = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/bookings/${booking._id}`);
+                        router.push(`/trip/${booking._id}/details`);
                       }}
                       className="px-5 py-2.5 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm hover:shadow-md flex items-center"
                     >
