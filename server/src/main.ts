@@ -35,6 +35,12 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'], // Header được phép gửi
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Các phương thức được phép
   });
+  app.use((req, res, next) => {
+    res.setTimeout(15000, () => {
+      res.status(408).send('Request Timeout');
+    });
+    next();
+  });
   app.use(cookieParser());
   await app.listen(port);
 }

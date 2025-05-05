@@ -13,6 +13,10 @@ export class CreateBookingDto {
   @IsMongoId({ message: 'ID sản phẩm phải là MongoDB ObjectId hợp lệ' })
   productId: string;
 
+  productName?: string;
+
+  name?: string;
+
   @IsNotEmpty({ message: 'Ngày check-in không được để trống' })
   @Type(() => Date)
   @IsDate({ message: 'Ngày check-in phải là kiểu Date hợp lệ' })

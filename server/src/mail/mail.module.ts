@@ -1,9 +1,8 @@
-
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
-import { MailService } from './mail.service';
+import { EmailService as MailService } from './mail.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -13,18 +12,26 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         transport: {
-          host: config.get('MAIL_HOST', 'smtp.gmail.com'),
+          host: 'smtp.gmail.com',
+          port: 587,
           secure: false,
           auth: {
             user: config.get('MAIL_USER'),
-            pass: config.get('MAIL_PASSWORD'),
+            pass: config.get('MAIL_PASS'),
           },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          debug: true,
+          logger: true,
         },
         defaults: {
-          from: `"Neo Booking" <${config.get('MAIL_FROM', 'noreply@booking.com')}>`,
+          from: `"Neo Booking" <${config.get(
+            'MAIL_FROM',
+            'noreply@booking.com',
+          )}>`,
         },
         template: {
-          dir: join(__dirname, 'templates'),
+          dir: join(process.cwd(), 'dist/mail/templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

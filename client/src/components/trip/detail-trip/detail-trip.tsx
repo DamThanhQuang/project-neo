@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import axios from '@/lib/axios';
-import Cookies from 'js-cookie';
-import { 
-  CalendarIcon, MapPinIcon, HomeIcon, 
-  CreditCardIcon, UserIcon, PhoneIcon, 
-  ExclamationCircleIcon, ArrowLeftIcon 
-} from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "@/lib/axios";
+import Cookies from "js-cookie";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  HomeIcon,
+  CreditCardIcon,
+  UserIcon,
+  PhoneIcon,
+  ExclamationCircleIcon,
+  ArrowLeftIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 // Định nghĩa interfaces
 interface ProductDescription {
@@ -46,33 +51,46 @@ interface Booking {
 }
 
 // Modal component
-function DescriptionModal({ 
-  isOpen, 
-  onClose, 
-  description 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  description: ProductDescription 
+function DescriptionModal({
+  isOpen,
+  onClose,
+  description,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  description: ProductDescription;
 }) {
   if (!isOpen) return null;
-  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Thông tin chi tiết</h2>
-            <button 
+            <h2 className="text-2xl font-bold text-gray-800">
+              Thông tin chi tiết
+            </h2>
+            <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
-          
+
           <div className="space-y-6">
             {description.description && (
               <div>
@@ -80,28 +98,32 @@ function DescriptionModal({
                 <p className="text-gray-600">{description.description}</p>
               </div>
             )}
-            
+
             {description.descriptionDetail && (
               <div>
                 <h3 className="text-lg font-medium mb-2">Chi tiết</h3>
                 <p className="text-gray-600">{description.descriptionDetail}</p>
               </div>
             )}
-            
+
             {description.guestsAmenities && (
               <div>
                 <h3 className="text-lg font-medium mb-2">Tiện ích cho khách</h3>
                 <p className="text-gray-600">{description.guestsAmenities}</p>
               </div>
             )}
-            
+
             {description.interactionWithGuests && (
               <div>
-                <h3 className="text-lg font-medium mb-2">Tương tác với khách</h3>
-                <p className="text-gray-600">{description.interactionWithGuests}</p>
+                <h3 className="text-lg font-medium mb-2">
+                  Tương tác với khách
+                </h3>
+                <p className="text-gray-600">
+                  {description.interactionWithGuests}
+                </p>
               </div>
             )}
-            
+
             {description.otherThingsToNote && (
               <div>
                 <h3 className="text-lg font-medium mb-2">Lưu ý khác</h3>
@@ -109,7 +131,7 @@ function DescriptionModal({
               </div>
             )}
           </div>
-          
+
           <div className="mt-8 text-center">
             <button
               onClick={onClose}
@@ -128,32 +150,31 @@ export default function BookingDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const bookingId = params.id as string;
-  
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDescriptionModalOpen, setDescriptionModalOpen] = useState<boolean>(false);
+  const [isDescriptionModalOpen, setDescriptionModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
         setLoading(true);
         const token = Cookies.get("token");
-        
+
         if (!token) {
           router.push("/login");
           return;
         }
-        
+
         console.log("Đang lấy thông tin đặt phòng với ID:", bookingId);
         const response = await axios.get(`/bookings/${bookingId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        
-        console.log("Phản hồi API nhận được:", response.data);
-        
+
         // Kiểm tra xem dữ liệu có đúng cấu trúc không
         if (!response.data || !response.data.productId) {
           console.error("Cấu trúc phản hồi không hợp lệ:", response.data);
@@ -161,19 +182,25 @@ export default function BookingDetailsPage() {
           setLoading(false);
           return;
         }
-        
+
         // Xử lý productId nếu nó chỉ là một chuỗi tham chiếu chứ không phải object đầy đủ
         const bookingData = response.data;
-        if (typeof bookingData.productId === 'string') {
-          console.warn("ProductId là một chuỗi tham chiếu thay vì một đối tượng đầy đủ");
+        if (typeof bookingData.productId === "string") {
+          console.warn(
+            "ProductId là một chuỗi tham chiếu thay vì một đối tượng đầy đủ"
+          );
           // Nếu bạn có cách để lấy thông tin sản phẩm riêng biệt, bạn có thể làm ở đây
         }
-        
+
         setBooking(bookingData);
         setLoading(false);
       } catch (err: any) {
         console.error("Lỗi khi lấy chi tiết đặt phòng:", err);
-        setError(`Không thể tải thông tin chi tiết đặt phòng: ${err.message || 'Lỗi không xác định'}`);
+        setError(
+          `Không thể tải thông tin chi tiết đặt phòng: ${
+            err.message || "Lỗi không xác định"
+          }`
+        );
         setLoading(false);
       }
     };
@@ -192,7 +219,9 @@ export default function BookingDetailsPage() {
     if (!booking) return 0;
     const checkIn = new Date(booking.checkIn);
     const checkOut = new Date(booking.checkOut);
-    return Math.round((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.round(
+      (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+    );
   };
 
   if (loading) {
@@ -220,7 +249,9 @@ export default function BookingDetailsPage() {
   if (!booking) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 font-sans">
-        <p className="text-center text-gray-600">Không tìm thấy thông tin đặt phòng</p>
+        <p className="text-center text-gray-600">
+          Không tìm thấy thông tin đặt phòng
+        </p>
       </div>
     );
   }
@@ -230,7 +261,10 @@ export default function BookingDetailsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 font-sans">
       <div className="mb-8">
-        <Link href="/trip" className="inline-flex items-center text-gray-600 hover:text-gray-900">
+        <Link
+          href="/trip"
+          className="inline-flex items-center text-gray-600 hover:text-gray-900"
+        >
           <ArrowLeftIcon className="h-5 w-5 mr-2" />
           Quay lại danh sách chuyến đi
         </Link>
@@ -238,25 +272,36 @@ export default function BookingDetailsPage() {
 
       <div className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
         {/* Booking status header */}
-        <div className={`py-4 px-6 ${
-          booking.status === 'confirmed' ? 'bg-green-50 border-b border-green-100' : 
-          booking.status === 'cancelled' ? 'bg-red-50 border-b border-red-100' : 
-          'bg-yellow-50 border-b border-yellow-100'
-        }`}>
+        <div
+          className={`py-4 px-6 ${
+            booking.status === "confirmed"
+              ? "bg-green-50 border-b border-green-100"
+              : booking.status === "cancelled"
+              ? "bg-red-50 border-b border-red-100"
+              : "bg-yellow-50 border-b border-yellow-100"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className={`w-3 h-3 rounded-full mr-2 ${
-                booking.status === 'confirmed' ? 'bg-green-500' : 
-                booking.status === 'cancelled' ? 'bg-red-500' : 
-                'bg-yellow-500'
-              }`}></div>
+              <div
+                className={`w-3 h-3 rounded-full mr-2 ${
+                  booking.status === "confirmed"
+                    ? "bg-green-500"
+                    : booking.status === "cancelled"
+                    ? "bg-red-500"
+                    : "bg-yellow-500"
+                }`}
+              ></div>
               <span className="font-medium">
-                {booking.status === 'confirmed' ? 'Đã xác nhận' : 
-                booking.status === 'cancelled' ? 'Đã hủy' : 'Đang chờ xác nhận'}
+                {booking.status === "confirmed"
+                  ? "Đã xác nhận"
+                  : booking.status === "cancelled"
+                  ? "Đã hủy"
+                  : "Đang chờ xác nhận"}
               </span>
             </div>
             <span className="text-sm text-gray-500">
-              Đặt lúc: {new Date(booking.createdAt).toLocaleString('vi-VN')}
+              Đặt lúc: {new Date(booking.createdAt).toLocaleString("vi-VN")}
             </span>
           </div>
         </div>
@@ -265,15 +310,18 @@ export default function BookingDetailsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
           {/* Left column - Product details */}
           <div className="md:col-span-2">
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">{booking.productId.name}</h1>
-            
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              {booking.productId.name}
+            </h1>
+
             <div className="flex items-center text-gray-600 mb-6">
               <MapPinIcon className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" />
               <p>
-                {booking.productId.location ? 
-                  `${booking.productId.location.address || ''}, ${booking.productId.location.city || ''}, ${booking.productId.location.country || ''}` : 
-                  'Không có địa chỉ'
-                }
+                {booking.productId.location
+                  ? `${booking.productId.location.address || ""}, ${
+                      booking.productId.location.city || ""
+                    }, ${booking.productId.location.country || ""}`
+                  : "Không có địa chỉ"}
               </p>
             </div>
 
@@ -281,9 +329,12 @@ export default function BookingDetailsPage() {
             <div className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {booking.productId.images.slice(0, 4).map((image, index) => (
-                  <div key={index} className="aspect-video rounded-lg overflow-hidden">
-                    <img 
-                      src={image} 
+                  <div
+                    key={index}
+                    className="aspect-video rounded-lg overflow-hidden"
+                  >
+                    <img
+                      src={image}
                       alt={`${booking.productId.name} - Hình ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -294,111 +345,152 @@ export default function BookingDetailsPage() {
 
             {/* Product description */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Thông tin phòng</h2>
-              
-              {typeof booking.productId.description === 'object' && booking.productId.description !== null ? (
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Thông tin phòng
+              </h2>
+
+              {typeof booking.productId.description === "object" &&
+              booking.productId.description !== null ? (
                 <div className="space-y-4">
                   {/* Hiển thị phiên bản thu gọn */}
                   <div className="bg-gray-50 p-4 rounded-lg">
                     {booking.productId.description.description && (
                       <div>
                         <h3 className="text-lg font-medium mb-2">Mô tả</h3>
-                        <p className="text-gray-600 line-clamp-3">{booking.productId.description.description}</p>
+                        <p className="text-gray-600 line-clamp-3">
+                          {booking.productId.description.description}
+                        </p>
                       </div>
                     )}
-                    
+
                     {/* Hiển thị số lượng các mục khác nếu có */}
                     <div className="mt-4 text-sm text-gray-500">
                       {[
-                        booking.productId.description.descriptionDetail && "Chi tiết",
-                        booking.productId.description.guestsAmenities && "Tiện ích cho khách",
-                        booking.productId.description.interactionWithGuests && "Tương tác với khách", 
-                        booking.productId.description.otherThingsToNote && "Lưu ý khác"
-                      ].filter(Boolean).join(", ")}
+                        booking.productId.description.descriptionDetail &&
+                          "Chi tiết",
+                        booking.productId.description.guestsAmenities &&
+                          "Tiện ích cho khách",
+                        booking.productId.description.interactionWithGuests &&
+                          "Tương tác với khách",
+                        booking.productId.description.otherThingsToNote &&
+                          "Lưu ý khác",
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
                     </div>
-                    
+
                     {/* Nút xem thêm */}
-                    <button 
+                    <button
                       className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg flex items-center transition"
                       onClick={() => setDescriptionModalOpen(true)}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Xem thêm thông tin chi tiết
                     </button>
                   </div>
-                  
+
                   {/* Modal component */}
-                  <DescriptionModal 
+                  <DescriptionModal
                     isOpen={isDescriptionModalOpen}
                     onClose={() => setDescriptionModalOpen(false)}
-                    description={booking.productId.description as ProductDescription}
+                    description={
+                      booking.productId.description as ProductDescription
+                    }
                   />
                 </div>
               ) : (
                 <p className="text-gray-600 mb-6">
-                  {typeof booking.productId.description === 'string' 
-                    ? booking.productId.description 
-                    : 'Không có mô tả cho phòng này.'}
+                  {typeof booking.productId.description === "string"
+                    ? booking.productId.description
+                    : "Không có mô tả cho phòng này."}
                 </p>
               )}
-              
+
               {/* Amenities */}
-              {booking.productId.amenities && booking.productId.amenities.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium mb-3">Tiện nghi</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {booking.productId.amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center text-gray-700">
-                        <svg className="h-4 w-4 mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        <span>{amenity}</span>
-                      </div>
-                    ))}
+              {booking.productId.amenities &&
+                booking.productId.amenities.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-3">Tiện nghi</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {booking.productId.amenities.map((amenity, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center text-gray-700"
+                        >
+                          <svg
+                            className="h-4 w-4 mr-2 text-green-500"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span>{amenity}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
 
           {/* Right column - Booking details */}
           <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 h-fit">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">Chi tiết đặt phòng</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">
+              Chi tiết đặt phòng
+            </h2>
+
             {/* Check-in/out */}
             <div className="mb-6">
               <div className="flex justify-between mb-4 pb-4 border-b border-gray-200">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Nhận phòng</h3>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Nhận phòng
+                  </h3>
                   <p className="font-medium">
-                    {new Date(booking.checkIn).toLocaleDateString('vi-VN', { 
-                      weekday: 'long',
-                      day: '2-digit', 
-                      month: 'long', 
-                      year: 'numeric' 
+                    {new Date(booking.checkIn).toLocaleDateString("vi-VN", {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
                     })}
                   </p>
                 </div>
                 <div className="text-right">
-                  <h3 className="text-sm font-medium text-gray-500">Trả phòng</h3>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Trả phòng
+                  </h3>
                   <p className="font-medium">
-                    {new Date(booking.checkOut).toLocaleDateString('vi-VN', { 
-                      weekday: 'long',
-                      day: '2-digit', 
-                      month: 'long', 
-                      year: 'numeric' 
+                    {new Date(booking.checkOut).toLocaleDateString("vi-VN", {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
                     })}
                   </p>
                 </div>
               </div>
               <div className="text-center text-gray-600">
                 <CalendarIcon className="h-5 w-5 inline mr-2" />
-                Tổng thời gian: <span className="font-medium">{nights} đêm</span>
+                Tổng thời gian:{" "}
+                <span className="font-medium">{nights} đêm</span>
               </div>
             </div>
-            
+
             {/* Guests */}
             <div className="mb-6 pb-4 border-b border-gray-200">
               <div className="flex items-center">
@@ -409,37 +501,53 @@ export default function BookingDetailsPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Price details */}
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-4">Chi tiết giá</h3>
-              
+              <h3 className="text-sm font-medium text-gray-500 mb-4">
+                Chi tiết giá
+              </h3>
+
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span>{booking.productId.price.toLocaleString('vi-VN')}đ x {nights} đêm</span>
-                  <span>{(booking.productId.price * nights).toLocaleString('vi-VN')}đ</span>
+                  <span>
+                    {booking.productId.price.toLocaleString("vi-VN")}đ x{" "}
+                    {nights} đêm
+                  </span>
+                  <span>
+                    {(booking.productId.price * nights).toLocaleString("vi-VN")}
+                    đ
+                  </span>
                 </div>
-                
+
                 <div className="flex justify-between">
                   <span>Phí dịch vụ</span>
-                  <span>{(booking.totalPrice - booking.productId.price * nights).toLocaleString('vi-VN')}đ</span>
+                  <span>
+                    {(
+                      booking.totalPrice -
+                      booking.productId.price * nights
+                    ).toLocaleString("vi-VN")}
+                    đ
+                  </span>
                 </div>
-                
+
                 <div className="pt-3 mt-3 border-t border-gray-200 flex justify-between font-bold">
                   <span>Tổng</span>
-                  <span>{booking.totalPrice.toLocaleString('vi-VN')}đ</span>
+                  <span>{booking.totalPrice.toLocaleString("vi-VN")}đ</span>
                 </div>
               </div>
             </div>
-            
+
             {/* Actions */}
-            {booking.status === 'confirmed' && (
+            {booking.status === "confirmed" && (
               <div className="mt-6">
-                <button 
+                <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-4">
+                  Thanh Toán
+                </button>
+                <button
                   className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                   onClick={() => {
-                    // Implement cancel booking functionality
-                    alert('Tính năng hủy đặt phòng sẽ được triển khai sau');
+                    alert("Tính năng hủy đặt phòng sẽ được triển khai sau");
                   }}
                 >
                   Hủy đặt phòng

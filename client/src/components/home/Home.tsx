@@ -13,6 +13,7 @@ import Newsletter from "./Newsletter";
 
 interface Listing {
   id: string;
+  title: string;
   location: {
     city: string;
     country: string;
@@ -49,6 +50,7 @@ export default function Home() {
 
       const formattedData = data.map((item: any) => ({
         id: item._id,
+        title: item.title,
         location: {
           city: item.location.city,
           country: item.location.country,

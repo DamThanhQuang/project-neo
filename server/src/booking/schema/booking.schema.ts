@@ -12,6 +12,12 @@ export class Booking {
   productId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
+  productName: string;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop({ required: true })
   checkIn: Date;
 
   @Prop({ required: true })

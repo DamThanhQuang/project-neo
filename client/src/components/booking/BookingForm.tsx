@@ -7,6 +7,7 @@ import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import axios from "@/lib/axios";
+import { isAxiosError } from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
@@ -194,20 +195,6 @@ export default function BookingForm({
         checkOut: booking.dateRange.endDate.toISOString(),
         guests: Number(booking.guests),
         totalPrice: Number(finalPrice),
-        // // Thông tin thanh toán
-        // paymentMethod: booking.paymentMethod,
-        // installmentMonths: booking.installmentMonths,
-        // // Thông tin đặt phòng nhóm
-        // isGroupBooking: booking.isGroupBooking,
-        // groupMembers: booking.groupMembers,
-        // // Thông tin khuyến mãi
-        // isLastMinute: isBookingLastMinute(),
-        // // Thông tin điểm thưởng
-        // usingLoyaltyPoints: booking.usingPoints,
-        // loyaltyPointsUsed: booking.usingPoints
-        //   ? Math.min(1250, Math.round(totalWithFees * 0.1))
-        //   : 0,
-        // loyaltyPointsEarned: Math.round(finalPrice * 0.05),
       };
 
       console.log("Booking data:", bookingData);
@@ -244,13 +231,35 @@ export default function BookingForm({
       }, 3000);
     } catch (error) {
       console.error("Booking error:", error);
+
+      // Improved error handling
+      let errorMessage = "Không thể hoàn tất đặt phòng. Vui lòng thử lại.";
+
+      if (isAxiosError(error) && error.response && error.response.data) {
+        // Get error message from response if available
+        if (error.response.data && error.response.data.message) {
+          errorMessage = Array.isArray(error.response.data.message)
+            ? error.response.data.message[0]
+            : error.response.data.message;
+        } else if (error.response.status === 400) {
+          errorMessage =
+            "Thông tin đặt phòng không hợp lệ. Vui lòng kiểm tra lại.";
+        } else if (error.response.status === 401) {
+          errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+        } else if (error.response.status === 403) {
+          errorMessage = "Bạn không có quyền thực hiện hành động này.";
+        } else if (error.response.status === 404) {
+          errorMessage =
+            "Không tìm thấy thông tin phòng. Vui lòng thử lại sau.";
+        } else if (error.response.status >= 500) {
+          errorMessage = "Hệ thống đang gặp sự cố. Vui lòng thử lại sau.";
+        }
+      }
+
       setBooking((prev) => ({
         ...prev,
         isSubmitting: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Không thể hoàn tất đặt phòng. Vui lòng thử lại.",
+        error: errorMessage,
       }));
     }
   };

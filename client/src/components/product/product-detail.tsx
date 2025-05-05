@@ -138,7 +138,7 @@ export default function ProductDetail() {
         const transformedProduct = {
           id: productData._id,
           image: productData.images || [productData.image || ""],
-          title: productData.name || "Product Name",
+          title: productData.title || productData.name || "Product Title",
           description: productData.description || {
             description: "Product Description",
             descriptionDetail: "Product Details",
