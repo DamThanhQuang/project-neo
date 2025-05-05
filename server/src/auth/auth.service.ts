@@ -18,12 +18,14 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 //import { RegisterBusinessDto } from './dto/register-business.dto';
 import { Business, BusinessDocument } from '@/business/schemas/business.schema';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Business.name) private businessModel: Model<BusinessDocument>,
+    private mailerService: MailerService,
     private jwtService: JwtService,
   ) {}
 
@@ -45,6 +47,16 @@ export class AuthService {
       password: hashedPassword,
       role,
     });
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Welcome to Neo Booking',
+      template: './welcome', 
+      context: {
+        name: firstName,
+
+      }
+    })
 
     return newUser.save();
   }

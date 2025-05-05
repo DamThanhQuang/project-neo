@@ -14,6 +14,8 @@ import { S3Module } from './aws/s3.module';
 import { ErrorService } from './common/services/error.service';
 import { BookingModule } from './booking/booking.module';
 import { MailModule } from './mail/mail.module';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -36,18 +38,23 @@ import { MailModule } from './mail/mail.module';
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',
-          port: 465,
+          port: 587,
           secure: false,
           auth: {
             user: configService.get<string>('MAIL_USER'),
             pass: configService.get<string>('MAIL_PASS'),
           },
-          pool: true,
         },
         defaults: {
-          from: '"No Reply" <no-reply@localhost>',
+          from: `"No Reply <${configService.get('MAIL_FROM')}>`,
         },
-        preview: true,
+        template: {
+          dir: join(__dirname, 'src/templates/email'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          }
+        }
       }),
       inject: [ConfigService],
     }),

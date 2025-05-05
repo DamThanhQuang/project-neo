@@ -31,7 +31,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           )}>`,
         },
         template: {
-          dir: join(process.cwd(), 'dist/mail/templates'),
+          dir: join(__dirname, 'src/templates/booking'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

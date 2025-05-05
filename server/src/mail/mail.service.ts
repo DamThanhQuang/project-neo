@@ -8,31 +8,33 @@ export class EmailService {
 
   constructor(private mailerService: MailerService) {}
 
-  async sendBookingConfirmation(booking: Booking, userEmail: string) {
-    this.logger.log(`Đang gửi email xác nhận đặt phòng cho: ${userEmail}`);
-
-    try {
-      await this.mailerService.sendMail({
-        to: userEmail,
-        subject: `Xác nhận đặt phòng - ${booking.productName}`,
-        template: 'booking-confirmation', // Sử dụng template thay vì text
-        context: {
-          name: booking.name,
-          nameProduct: booking.productName,
-          bookingId: booking.productId,
-          checkIn: new Date(booking.checkIn).toLocaleDateString('vi-VN'),
-          checkOut: new Date(booking.checkOut).toLocaleDateString('vi-VN'),
-          guestCount: booking.guests,
-          totalAmount: booking.totalPrice,
+ async sendBookingConfirmation(booking: Booking, email: string): Promise<boolean> {
+  try {
+    const bookingObj = (booking as any).toObject ? (booking as any).toObject() : booking;
+    
+    // Tạo URL xem chi tiểt phòng đặt
+    const viewBookingUrl = `${process.env.FRONTEND_URL}/trip/${bookingObj._id}/details`; 
+    
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Xác nhận đặt phòng',
+      template: './booking', // Đường dẫn đến template email
+      context: {
+        name: bookingObj.name,
+        booking: bookingObj,
+        viewBookingUrl: viewBookingUrl,
+        formatDate: function(date: Date) {
+          return new Date(date).toLocaleDateString('vi-VN');
         },
-      });
-
-      this.logger.log(`Đã gửi email xác nhận thành công cho: ${userEmail}`);
-      return true;
-    } catch (error) {
-      this.logger.error(`Lỗi khi gửi email: ${error.message}`);
-      this.logger.error(`Chi tiết lỗi: ${JSON.stringify(error)}`);
-      return false;
-    }
+        formatCurrency: function(amount: number) {
+          return amount.toLocaleString('vi-VN');
+        }
+      }
+    });
+    return true;
+  } catch (error) {
+    this.logger.error(`Lỗi khi gửi email xác nhận đặt phòng: ${error.message}`);
+    return false;
   }
+}
 }

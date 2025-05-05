@@ -46,16 +46,4 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
-
-  @Get('mail')
-  @Public()
-  async sendMail() {
-    this.mailerService.sendMail({
-      to: 'damquang2033@gmail.com',
-      subject: 'Test send mail',
-      text: 'Xin Chao',
-      html: '<b>Hello World</b>',
-    });
-    return 'ok';
-  }
 }
