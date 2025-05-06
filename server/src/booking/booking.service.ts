@@ -363,4 +363,22 @@ export class BookingService implements OnModuleInit {
       this.scheduleExpiration(booking);
     }
   }
+
+  async updatePaymentStatus(bookingId: string, status: string) {
+    try {
+      // Cập nhật trạng thái thanh toán trong database
+      const updatedBooking = await this.bookingModel.findByIdAndUpdate(
+        bookingId,
+        { paymentStatus: status },
+        { new: true },
+      );
+      console.log(
+        `Đã cập nhật trạng thái thanh toán cho booking ${bookingId} thành ${status}`,
+      );
+      return updatedBooking;
+    } catch (error) {
+      console.error('Lỗi khi cập nhật trạng thái thanh toán:', error);
+      throw new Error('Không thể cập nhật trạng thái thanh toán');
+    }
+  }
 }

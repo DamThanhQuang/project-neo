@@ -30,6 +30,8 @@ export class StripeService {
       metadata.bookingId = options.bookingId;
     }
 
+    console.log(metadata);
+
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -53,7 +55,7 @@ export class StripeService {
       cancel_url: `${this.configService.get('FRONTEND_URL')}/cancel`,
     });
 
-    console.log('Stripe session created:', session);
+    console.log('Stripe session created:', session.metadata);
     return { id: session.id, url: session.url };
   }
 

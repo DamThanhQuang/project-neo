@@ -21,11 +21,16 @@ export class StripeController {
   async checkoutSession(
     @Body() paymentData: { amount: number; email: string; bookingId: string },
   ) {
+    console.log('Received payment data:', paymentData);
+    console.log('bookingId received:', paymentData.bookingId);
+
     const session = await this.stripeService.createPayment({
       amount: paymentData.amount,
       email: paymentData.email,
       bookingId: paymentData.bookingId,
     });
+
+    console.log('Stripe session created:', session);
     return session;
   }
 
@@ -61,6 +66,37 @@ export class StripeController {
       throw new BadRequestException(
         'Failed to verify payment: ' + error.message,
       );
+    }
+  }
+
+  @Get('success')
+  async handleSuccess(@Query('session_id') sessionId: string) {
+    try {
+      const paymentResult = await this.stripeService.verifyPayment(sessionId);
+
+      if (paymentResult.success) {
+        // Kiểm tra metadata có bookingId không
+        const bookingId = paymentResult.metadata?.bookingId;
+
+        if (bookingId) {
+          // Cập nhật trạng thái payment và booking
+          await this.bookingService.updatePaymentStatus(bookingId, 'paid');
+          await this.bookingService.confirmPayment(bookingId);
+
+          console.log(
+            `Đã cập nhật trạng thái thanh toán cho booking ${bookingId}`,
+          );
+        } else {
+          console.error('Không tìm thấy bookingId trong metadata của session');
+        }
+
+        return { success: true, message: 'Thanh toán thành công' };
+      } else {
+        return { success: false, message: 'Thanh toán thất bại' };
+      }
+    } catch (error) {
+      console.error('Lỗi xử lý thanh toán:', error);
+      return { success: false, message: 'Lỗi xử lý thanh toán' };
     }
   }
 }

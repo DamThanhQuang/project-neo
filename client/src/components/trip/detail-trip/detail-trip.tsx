@@ -248,6 +248,7 @@ export default function BookingDetailsPage() {
         {
           amount: booking?.totalPrice || 0,
           email: userEmail,
+          bookingId: booking?._id || "",
         },
         {
           headers: {
