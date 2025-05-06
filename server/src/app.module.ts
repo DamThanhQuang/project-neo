@@ -16,6 +16,8 @@ import { BookingModule } from './booking/booking.module';
 import { MailModule } from './mail/mail.module';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { StripeModule } from './payment/stripe/stripe.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -53,15 +55,17 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
-          }
-        }
+          },
+        },
       }),
       inject: [ConfigService],
     }),
+    EventEmitterModule.forRoot(),
     ProductModule,
     BusinessModule,
     BookingModule,
     MailModule,
+    StripeModule,
   ],
   controllers: [AppController, ExampleController],
   providers: [

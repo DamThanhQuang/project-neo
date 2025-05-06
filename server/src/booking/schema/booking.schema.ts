@@ -23,14 +23,28 @@ export class Booking {
   @Prop({ required: true })
   checkOut: Date;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   guests: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: Number })
   totalPrice: number;
 
-  @Prop({ default: 'confirmed' })
+  @Prop({
+    type: String,
+    enum: ['pending', 'active', 'comfirmed', 'completed', 'cancelled'],
+    default: 'pending',
+  })
   status: string;
+
+  @Prop({
+    type: String,
+    enum: ['unpaid', 'paid', 'refunded'],
+    default: 'unpaid',
+  })
+  paymentStatus: string;
+
+  @Prop()
+  paymentDate: Date;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);

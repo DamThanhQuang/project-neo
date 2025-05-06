@@ -25,10 +25,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           logger: true,
         },
         defaults: {
-          from: `"Neo Booking" <${config.get(
-            'MAIL_FROM',
-            'noreply@booking.com',
-          )}>`,
+          from: `"Neo Booking" <${config.get('noreply@booking.com')}>`,
         },
         template: {
           dir: join(__dirname, 'src/templates/booking'),

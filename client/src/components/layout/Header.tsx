@@ -80,6 +80,8 @@ export default function Header() {
             userData.avatar ||
             "https://flowbite.com/docs/images/people/profile-picture-5.jpg",
         });
+        console.log("User data:", userData);
+
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);

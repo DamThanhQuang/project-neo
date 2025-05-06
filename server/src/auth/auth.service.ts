@@ -36,9 +36,6 @@ export class AuthService {
       throw new BadRequestException('Password không hợp lệ');
     }
 
-    // Kiểm tra email trùng lặp
-    //await EmailHelper.checkDuplicateEmail(email, this.userModel);
-
     const hashedPassword = await PasswordHelper.hashPassword(password);
     const newUser = new this.userModel({
       firstName,
@@ -51,12 +48,11 @@ export class AuthService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Welcome to Neo Booking',
-      template: './welcome', 
+      template: './welcome',
       context: {
         name: firstName,
-
-      }
-    })
+      },
+    });
 
     return newUser.save();
   }

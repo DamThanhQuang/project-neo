@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "@/lib/axios";
+import { isAxiosError } from "axios";
 import Cookies from "js-cookie";
 import {
   CalendarIcon,
@@ -15,6 +16,7 @@ import {
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import PaymentModal from "@/components/trip/payment-modal/payment-modal";
 
 // Định nghĩa interfaces
 interface ProductDescription {
@@ -44,6 +46,7 @@ interface Booking {
   productId: Product;
   checkIn: string;
   checkOut: string;
+  name: string;
   status: string;
   createdAt: string;
   totalPrice: number;
@@ -156,6 +159,8 @@ export default function BookingDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDescriptionModalOpen, setDescriptionModalOpen] =
     useState<boolean>(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -224,6 +229,57 @@ export default function BookingDetailsPage() {
     );
   };
 
+  const processPayment = async () => {
+    setIsProcessingPayment(true);
+    try {
+      // Lấy token xác thực
+      const token = Cookies.get("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      // Lấy email từ thông tin người dùng
+      const userEmail = booking?.name || "";
+
+      // Gọi API thanh toán
+      const response = await axios.post(
+        "/payment/create-checkout-session",
+        {
+          amount: booking?.totalPrice || 0,
+          email: userEmail,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Chuyển hướng đến trang thanh toán Stripe
+      if (response.data && response.data.url) {
+        console.log("Đang chuyển hướng đến trang thanh toán...");
+        window.location.href = response.data.url;
+      } else {
+        throw new Error("Không nhận được URL thanh toán");
+      }
+    } catch (error) {
+      console.error("Lỗi khi tạo phiên thanh toán:", error);
+
+      // Xử lý lỗi chi tiết hơn
+      if (isAxiosError(error)) {
+        const errorMessage =
+          error.response?.data?.message || "Lỗi kết nối đến máy chủ";
+        alert(`Không thể tạo phiên thanh toán: ${errorMessage}`);
+      } else {
+        alert("Không thể tạo phiên thanh toán. Vui lòng thử lại sau.");
+      }
+    } finally {
+      setIsProcessingPayment(false);
+      setPaymentModalOpen(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 font-sans">
@@ -278,6 +334,8 @@ export default function BookingDetailsPage() {
               ? "bg-green-50 border-b border-green-100"
               : booking.status === "cancelled"
               ? "bg-red-50 border-b border-red-100"
+              : booking.status === "completed"
+              ? "bg-blue-50 border-b border-blue-100"
               : "bg-yellow-50 border-b border-yellow-100"
           }`}
         >
@@ -289,14 +347,20 @@ export default function BookingDetailsPage() {
                     ? "bg-green-500"
                     : booking.status === "cancelled"
                     ? "bg-red-500"
+                    : booking.status === "completed"
+                    ? "bg-blue-500"
                     : "bg-yellow-500"
                 }`}
               ></div>
               <span className="font-medium">
                 {booking.status === "confirmed"
-                  ? "Đã xác nhận"
+                  ? "Đã xác nhận thanh toán"
                   : booking.status === "cancelled"
                   ? "Đã hủy"
+                  : booking.status === "completed"
+                  ? "Đã hoàn thành"
+                  : booking.status === "active"
+                  ? "Đã xác nhận"
                   : "Đang chờ xác nhận"}
               </span>
             </div>
@@ -539,10 +603,45 @@ export default function BookingDetailsPage() {
             </div>
 
             {/* Actions */}
-            {booking.status === "confirmed" && (
+            {/* Chỉ hiển thị nút thanh toán khi status là pending hoặc active */}
+            {(booking.status === "pending" || booking.status === "active") && (
               <div className="mt-6">
-                <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors mb-4">
-                  Thanh Toán
+                <button
+                  className={`w-full py-3 ${
+                    isProcessingPayment
+                      ? "bg-blue-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } text-white rounded-lg font-medium transition-colors mb-4`}
+                  disabled={isProcessingPayment}
+                  onClick={() => setPaymentModalOpen(true)}
+                >
+                  {isProcessingPayment ? (
+                    <div className="flex items-center justify-center">
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Đang xử lý...
+                    </div>
+                  ) : (
+                    "Thanh Toán"
+                  )}
                 </button>
                 <button
                   className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
@@ -557,9 +656,42 @@ export default function BookingDetailsPage() {
                 </p>
               </div>
             )}
+
+            {/* Hiển thị trạng thái "confirmed" với nội dung khác */}
+            {booking.status === "confirmed" && (
+              <div className="mt-6 bg-green-50 p-4 rounded-lg border border-green-100">
+                <div className="flex items-center text-green-700 mb-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="font-medium">Đã thanh toán thành công</span>
+                </div>
+                <p className="text-sm text-green-600">
+                  Đặt phòng của bạn đã được xác nhận và thanh toán thành công.
+                  Chúc bạn có kỳ nghỉ vui vẻ!
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        onConfirm={processPayment}
+        booking={booking}
+        isProcessing={isProcessingPayment}
+        calculateNights={calculateNights}
+      />
     </div>
   );
 }
