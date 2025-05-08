@@ -188,13 +188,11 @@ export default function BookingDetailsPage() {
           return;
         }
 
-        // Xử lý productId nếu nó chỉ là một chuỗi tham chiếu chứ không phải object đầy đủ
         const bookingData = response.data;
         if (typeof bookingData.productId === "string") {
           console.warn(
             "ProductId là một chuỗi tham chiếu thay vì một đối tượng đầy đủ"
           );
-          // Nếu bạn có cách để lấy thông tin sản phẩm riêng biệt, bạn có thể làm ở đây
         }
 
         setBooking(bookingData);
@@ -337,6 +335,8 @@ export default function BookingDetailsPage() {
               ? "bg-red-50 border-b border-red-100"
               : booking.status === "completed"
               ? "bg-blue-50 border-b border-blue-100"
+              : booking.status === "expired"
+              ? "bg-gray-50 border-b border-gray-100"
               : "bg-yellow-50 border-b border-yellow-100"
           }`}
         >
@@ -350,6 +350,8 @@ export default function BookingDetailsPage() {
                     ? "bg-red-500"
                     : booking.status === "completed"
                     ? "bg-blue-500"
+                    : booking.status === "expired"
+                    ? "bg-gray-500"
                     : "bg-yellow-500"
                 }`}
               ></div>
@@ -362,6 +364,8 @@ export default function BookingDetailsPage() {
                   ? "Đã hoàn thành"
                   : booking.status === "active"
                   ? "Đã xác nhận"
+                  : booking.status === "expired"
+                  ? "Đã hết hạn"
                   : "Đang chờ xác nhận"}
               </span>
             </div>
@@ -679,6 +683,30 @@ export default function BookingDetailsPage() {
                 <p className="text-sm text-green-600">
                   Đặt phòng của bạn đã được xác nhận và thanh toán thành công.
                   Chúc bạn có kỳ nghỉ vui vẻ!
+                </p>
+              </div>
+            )}
+
+            {/* Hiển thị trạng thái "expired" với nội dung khác */}
+            {booking.status === "expired" && (
+              <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <div className="flex items-center text-gray-700 mb-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="font-medium">Đặt phòng đã hết hạn</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Đặt phòng của bạn đã hết hạn và không còn hiệu lực.
                 </p>
               </div>
             )}

@@ -7,7 +7,6 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { Model, ObjectId, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { AddReviewDto } from './dto/add-review.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schemas/product.schemas';
 import { Business, BusinessDocument } from '@/business/schemas/business.schema';
@@ -65,44 +64,44 @@ export class ProductService {
     }
   }
 
-  async addReview(addReviewDto: AddReviewDto): Promise<Product> {
-    try {
-      const product = await this.productModel
-        .findById(new Types.ObjectId(addReviewDto.productId))
-        .exec();
+  // async addReview(addReviewDto: AddReviewDto): Promise<Product> {
+  //   try {
+  //     const product = await this.productModel
+  //       .findById(new Types.ObjectId(addReviewDto.productId))
+  //       .exec();
 
-      console.log('Product search result:', product);
+  //     console.log('Product search result:', product);
 
-      if (!product) {
-        throw new NotFoundException(
-          `Product not found with productId: ${addReviewDto.productId}`,
-        );
-      }
+  //     if (!product) {
+  //       throw new NotFoundException(
+  //         `Product not found with productId: ${addReviewDto.productId}`,
+  //       );
+  //     }
 
-      // Thêm review
-      product.reviews.push({
-        userId: addReviewDto.userId,
-        rating: addReviewDto.rating,
-        comment: addReviewDto.comment,
-        createdAt: new Date(),
-      });
+  //     // Thêm review
+  //     product.reviews.push({
+  //       userId: addReviewDto.userId,
+  //       rating: addReviewDto.rating,
+  //       comment: addReviewDto.comment,
+  //       createdAt: new Date(),
+  //     });
 
-      // Tính rating trung bình
-      product.averageRating =
-        product.reviews.reduce((total, review) => total + review.rating, 0) /
-        product.reviews.length;
+  //     // Tính rating trung bình
+  //     product.averageRating =
+  //       product.reviews.reduce((total, review) => total + review.rating, 0) /
+  //       product.reviews.length;
 
-      // Lưu và trả về sản phẩm đã cập nhật
-      return await product.save();
-    } catch (error) {
-      console.error('Add review error:', {
-        productId: addReviewDto.productId,
-        error: error.message,
-        collection: this.productModel.collection.name,
-      });
-      throw error;
-    }
-  }
+  //     // Lưu và trả về sản phẩm đã cập nhật
+  //     return await product.save();
+  //   } catch (error) {
+  //     console.error('Add review error:', {
+  //       productId: addReviewDto.productId,
+  //       error: error.message,
+  //       collection: this.productModel.collection.name,
+  //     });
+  //     throw error;
+  //   }
+  // }
 
   async findAll(): Promise<Product[]> {
     try {

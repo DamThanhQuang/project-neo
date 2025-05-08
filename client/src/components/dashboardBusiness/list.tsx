@@ -22,8 +22,7 @@ export default function List() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Thêm state cho các tính năng mới
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +37,6 @@ export default function List() {
         console.log(userId);
 
         const token = Cookies.get("token");
-        // Single API call to get all products
         const response = await axios.get(`/business/products/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -73,22 +71,31 @@ export default function List() {
 
   // Hàm lọc sản phẩm theo tìm kiếm và trạng thái
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+    const matchesSearch = product.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || product.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   // Phân trang
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredProducts.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   // Thay đổi trang
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   // Lấy danh sách trạng thái duy nhất
-  const statusOptions = ["all", ...Array.from(new Set(products.map(p => p.status || "Đang thực hiện")))];
+  const statusOptions = [
+    "all",
+    ...Array.from(new Set(products.map((p) => p.status || "Đang thực hiện"))),
+  ];
 
   // Show loading state
   if (loading) {
@@ -181,7 +188,7 @@ export default function List() {
                 <h2 className="text-xl font-semibold text-gray-800">
                   Mục cho thuê
                 </h2>
-                
+
                 {/* Thêm thanh tìm kiếm và bộ lọc */}
                 <div className="mt-4 flex flex-col md:flex-row gap-4">
                   <div className="flex-1">
@@ -206,18 +213,21 @@ export default function List() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500"
                     >
                       <option value="all">Tất cả trạng thái</option>
-                      {statusOptions.filter(s => s !== "all").map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
+                      {statusOptions
+                        .filter((s) => s !== "all")
+                        .map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 </div>
-                
+
                 {/* Hiển thị số lượng kết quả */}
                 <div className="mt-3 text-sm text-gray-500">
-                  Hiển thị {filteredProducts.length} kết quả {searchTerm && `cho "${searchTerm}"`}
+                  Hiển thị {filteredProducts.length} kết quả{" "}
+                  {searchTerm && `cho "${searchTerm}"`}
                 </div>
               </div>
 
@@ -286,10 +296,13 @@ export default function List() {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <p className="text-gray-500">Không tìm thấy mục cho thuê nào phù hợp với tìm kiếm của bạn.</p>
+                  <p className="text-gray-500">
+                    Không tìm thấy mục cho thuê nào phù hợp với tìm kiếm của
+                    bạn.
+                  </p>
                 </div>
               )}
-              
+
               {/* Phân trang */}
               {filteredProducts.length > itemsPerPage && (
                 <div className="p-4 flex justify-center">
@@ -305,23 +318,27 @@ export default function List() {
                     >
                       &laquo;
                     </button>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                      <button
-                        key={number}
-                        onClick={() => paginate(number)}
-                        className={`px-3 py-1 rounded-md ${
-                          currentPage === number
-                            ? "bg-rose-500 text-white"
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        {number}
-                      </button>
-                    ))}
-                    
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (number) => (
+                        <button
+                          key={number}
+                          onClick={() => paginate(number)}
+                          className={`px-3 py-1 rounded-md ${
+                            currentPage === number
+                              ? "bg-rose-500 text-white"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {number}
+                        </button>
+                      )
+                    )}
+
                     <button
-                      onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                      onClick={() =>
+                        paginate(Math.min(totalPages, currentPage + 1))
+                      }
                       disabled={currentPage === totalPages}
                       className={`px-3 py-1 rounded-md ${
                         currentPage === totalPages

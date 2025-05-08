@@ -77,21 +77,27 @@ export class Product {
   amenities: string[];
 
   // Reviews
-  @Prop({
-    type: [
-      { userId: String, rating: Number, comment: String, createdAt: Date },
-    ],
-    default: [],
-  })
-  reviews: {
-    userId: string;
-    rating: number;
-    comment: string;
-    createdAt: Date;
-  }[];
+  // @Prop({
+  //   type: [
+  //     {
+  //       bookingId: String,
+  //       userId: String,
+  //       rating: Number,
+  //       comment: String,
+  //       createdAt: Date,
+  //     },
+  //   ],
+  //   default: [],
+  // })
+  // reviews: {
+  //   userId: string;
+  //   rating: number;
+  //   comment: string;
+  //   createdAt: Date;
+  // }[];
 
-  @Prop({ default: 0 })
-  averageRating: number;
+  // @Prop({ default: 0 })
+  // averageRating: number;
 
   @Prop({ default: false })
   isNew: boolean;

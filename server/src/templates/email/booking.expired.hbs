@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Thông báo đặt phòng hết hạn</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #e74c3c; color: white; padding: 15px; text-align: center; }
+    .booking-details { background-color: #f5f5f5; padding: 15px; margin: 20px 0; }
+    .booking-info { margin-bottom: 10px; }
+    .footer { font-size: 14px; color: #777; margin-top: 30px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Thông Báo Đặt Phòng Hết Hạn</h1>
+    </div>
+    
+    <p>Kính gửi <strong>{{name}}</strong>,</p>
+    
+    <p>Đơn đặt phòng của bạn tại Neo Booking đã hết hạn. Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+    
+    <div class="booking-details">
+      <h3>Chi Tiết Đặt Phòng</h3>
+      
+      <div class="booking-info"><strong>Mã đặt phòng:</strong> {{_id}}</div>
+      <div class="booking-info"><strong>Tên phòng:</strong> {{productName}}</div>
+      <div class="booking-info"><strong>Ngày nhận phòng:</strong> {{checkIn}}</div>
+      <div class="booking-info"><strong>Ngày trả phòng:</strong> {{checkOut}}</div>
+      <div class="booking-info"><strong>Số người:</strong> {{guests}} người</div>
+      <div class="booking-info"><strong>Tổng thanh toán:</strong> {{totalPrice}} VNĐ</div>
+      <div class="booking-info"><strong>Trạng thái:</strong> <span style="color: #e74c3c">Đã hết hạn</span></div>
+    </div>
+    
+    <p>Chúng tôi mong được phục vụ bạn trong thời gian tới với những trải nghiệm tuyệt vời khác.</p>
+    
+    <a href="{{viewBookingUrl}}" style="background-color: #4c99af; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 15px;">Xem Chi Tiết Đặt Phòng</a>
+    
+    <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.</p>
+    
+    <div class="footer">
+      <p>© Neo Booking - Trải nghiệm đẳng cấp, giá trị vượt trội</p>
+    </div>
+  </div>
+</body>
+</html>

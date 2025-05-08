@@ -33,6 +33,12 @@ export class BookingController {
     return this.bookingService.create(createBookingDto, userId);
   }
 
+  @Get('expired-check')
+  @UseGuards(JwtAuthGuard)
+  checkExpiredBookings() {
+    return this.bookingService.checkExpiredBooking();
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req) {
@@ -40,14 +46,14 @@ export class BookingController {
     return this.bookingService.findAllByUser(userId);
   }
 
-@Get(':id')
-@UseGuards(JwtAuthGuard)
-async findOne(@Param('id') id:string, @Req() req) {
-  if (!Types.ObjectId.isValid(id)) {
-    throw new Error(`Invalid ObjectId format: ${id}`);
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string, @Req() req) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new Error(`Invalid ObjectId format: ${id}`);
+    }
+    const userId = req.user?._id;
+    const objectId = new Types.ObjectId(id);
+    return this.bookingService.findOneById(objectId.toString(), userId);
   }
-  const userId = req.user?._id;
-  const objectId = new Types.ObjectId(id);
-  return this.bookingService.findOneById(objectId.toString(), userId);
-}
 }

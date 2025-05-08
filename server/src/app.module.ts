@@ -18,6 +18,8 @@ import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { StripeModule } from './payment/stripe/stripe.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -61,11 +63,13 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     ProductModule,
     BusinessModule,
     BookingModule,
     MailModule,
     StripeModule,
+    ReviewModule,
   ],
   controllers: [AppController, ExampleController],
   providers: [

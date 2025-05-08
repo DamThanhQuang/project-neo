@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
-import { AddReviewDto } from './dto/add-review.dto';
 import { Public } from '@/auth/decorators/customs.decorator';
 import { JwtAuthGuard } from '@/auth/passport/jwt-auth.guard';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -25,12 +24,11 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
-  @Post('reviews')
-  @Public()
-  async addReview(@Body() addReviewDto: AddReviewDto) {
-    console.log('Adding review for product:', addReviewDto);
-    return this.productService.addReview(addReviewDto);
-  }
+  // @Post('add-reviews/:id')
+  // @UseGuards(JwtAuthGuard)
+  // async addReview(@Body() addReviewDto: AddReviewDto) {
+  //   return this.productService.addReview(addReviewDto);
+  // }
   @Get('get-all-product')
   @Public()
   async getAllProduct() {

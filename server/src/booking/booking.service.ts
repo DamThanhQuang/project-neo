@@ -15,6 +15,7 @@ import { ProductService } from '../product/product.service';
 import { UserService } from '@/user/user.service';
 import { EmailService } from '@/mail/mail.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class BookingService implements OnModuleInit {
@@ -380,5 +381,67 @@ export class BookingService implements OnModuleInit {
       console.error('Lỗi khi cập nhật trạng thái thanh toán:', error);
       throw new Error('Không thể cập nhật trạng thái thanh toán');
     }
+  }
+
+  async checkExpiredBooking() {
+    const currentDate = new Date();
+
+    // Tìm các booking sắp hết hạn trước khi cập nhật trạng thái
+    const expiredBookingsToNotify = await this.bookingModel.find({
+      checkOut: { $lt: currentDate },
+      status: { $in: ['active', 'confirmed'] },
+    });
+
+    // Cập nhật trạng thái booking thành expired
+    const updateResult = await this.bookingModel.updateMany(
+      {
+        checkOut: { $lt: currentDate },
+        status: { $in: ['active', 'confirmed'] },
+      },
+      {
+        $set: { status: 'expired' },
+      },
+    );
+
+    // Gửi email thông báo cho người dùng về booking đã hết hạn
+    if (expiredBookingsToNotify.length > 0) {
+      this.logger.log(
+        `Đang gửi email thông báo cho ${expiredBookingsToNotify.length} booking hết hạn`,
+      );
+
+      for (const booking of expiredBookingsToNotify) {
+        try {
+          const user = await this.userService.findById(
+            booking.userId.toString(),
+          );
+          if (user && user.email) {
+            await this.emailService.sendBookingExpiredNotification(
+              booking,
+              user.email,
+            );
+            this.logger.log(
+              `Đã gửi email thông báo hết hạn cho booking ${booking._id}`,
+            );
+          }
+        } catch (error) {
+          this.logger.error(
+            `Lỗi khi gửi email thông báo hết hạn: ${error.message}`,
+          );
+        }
+      }
+    }
+
+    return {
+      message: `Đã cập nhật ${updateResult.modifiedCount} booking hết hạn.`,
+    };
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
+    timeZone: 'Asia/Ho_Chi_Minh',
+  })
+  async handleCron() {
+    this.logger.log('Đang chạy tác vụ kiểm tra booking hết hạn...');
+    const result = await this.checkExpiredBooking();
+    this.logger.log(result.message);
   }
 }
