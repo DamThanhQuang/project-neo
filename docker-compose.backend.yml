@@ -9,7 +9,7 @@ services:
       - '3001:3001'
     volumes:
       - ./server:/app
-      - /app/node_modules # Volume này có thể đang gây vấn đề
+      - /app/node_modules 
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongo:27017/site_review

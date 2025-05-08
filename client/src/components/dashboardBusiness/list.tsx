@@ -22,6 +22,12 @@ export default function List() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Thêm state cho các tính năng mới
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     setIsVisible(true);
@@ -64,6 +70,25 @@ export default function List() {
       date.getMonth() + 1
     }, ${date.getFullYear()}`;
   };
+
+  // Hàm lọc sản phẩm theo tìm kiếm và trạng thái
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  // Phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  // Thay đổi trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Lấy danh sách trạng thái duy nhất
+  const statusOptions = ["all", ...Array.from(new Set(products.map(p => p.status || "Đang thực hiện")))];
 
   // Show loading state
   if (loading) {
@@ -152,74 +177,163 @@ export default function List() {
             className="w-full max-w-6xl"
           >
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-              <div className="px-6 py-4 border-b border-gray-100 ">
+              <div className="px-6 py-4 border-b border-gray-100">
                 <h2 className="text-xl font-semibold text-gray-800">
                   Mục cho thuê
                 </h2>
+                
+                {/* Thêm thanh tìm kiếm và bộ lọc */}
+                <div className="mt-4 flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm theo tiêu đề..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1); // Reset về trang 1 khi tìm kiếm
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    />
+                  </div>
+                  <div className="w-full md:w-auto">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setCurrentPage(1); // Reset về trang 1 khi lọc
+                      }}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    >
+                      <option value="all">Tất cả trạng thái</option>
+                      {statusOptions.filter(s => s !== "all").map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Hiển thị số lượng kết quả */}
+                <div className="mt-3 text-sm text-gray-500">
+                  Hiển thị {filteredProducts.length} kết quả {searchTerm && `cho "${searchTerm}"`}
+                </div>
               </div>
 
-              <div className="divide-y divide-gray-100">
-                {products.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="p-6 hover:bg-gray-50"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-16 w-16 overflow-hidden rounded-md">
-                          <img
-                            src={
-                              product.image ||
-                              "https://via.placeholder.com/300x200"
-                            }
-                            alt={product.title}
-                            className="h-full w-full object-cover"
-                          />
+              {currentItems.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {currentItems.map((product) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                      className="p-6 hover:bg-gray-50"
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="h-16 w-16 overflow-hidden rounded-md">
+                            <img
+                              src={
+                                product.image ||
+                                "https://via.placeholder.com/300x200"
+                              }
+                              alt={product.title}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-800">
+                              {product.title}
+                            </h3>
+                            <p className="text-gray-500 text-sm">
+                              {typeof product.location === "object"
+                                ? `${product.location.city || ""}, ${
+                                    product.location.country || ""
+                                  }`
+                                : product.location || "Long Biên, Hà Nội"}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-800">
-                            {product.title}
-                          </h3>
-                          <p className="text-gray-500 text-sm">
-                            {typeof product.location === "object"
-                              ? `${product.location.city || ""}, ${
-                                  product.location.country || ""
-                                }`
-                              : product.location || "Long Biên, Hà Nội"}
+
+                        <div className="flex flex-col md:items-end">
+                          <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block mb-2">
+                            {product.status || "Đang thực hiện"}
+                          </div>
+                          <p className="text-gray-500 text-xs">
+                            Nhà/phòng cho thuê được tạo vào{" "}
+                            {formatDate(product.createdAt) || "7 tháng 3, 2025"}
                           </p>
                         </div>
-                      </div>
 
-                      <div className="flex flex-col md:items-end">
-                        <div className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full inline-block mb-2">
-                          {product.status || "Đang thực hiện"}
+                        <div>
+                          {product.actionRequired && (
+                            <span className="bg-rose-100 text-rose-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                              Yêu cầu hành động
+                            </span>
+                          )}
+                          <Link
+                            href={`/host/dashboard/listing/${product.id}/details/photo-tour`}
+                            className="block mt-2 text-sm px-4 py-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 text-center transition-colors"
+                          >
+                            Chi tiết
+                          </Link>
                         </div>
-                        <p className="text-gray-500 text-xs">
-                          Nhà/phòng cho thuê được tạo vào{" "}
-                          {formatDate(product.createdAt) || "7 tháng 3, 2025"}
-                        </p>
                       </div>
-
-                      <div>
-                        {product.actionRequired && (
-                          <span className="bg-rose-100 text-rose-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                            Yêu cầu hành động
-                          </span>
-                        )}
-                        <Link
-                          href={`/host/dashboard/listing/${product.id}/details/photo-tour`}
-                          className="block mt-2 text-sm px-4 py-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 text-center transition-colors"
-                        >
-                          Chi tiết
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-gray-500">Không tìm thấy mục cho thuê nào phù hợp với tìm kiếm của bạn.</p>
+                </div>
+              )}
+              
+              {/* Phân trang */}
+              {filteredProducts.length > itemsPerPage && (
+                <div className="p-4 flex justify-center">
+                  <nav className="flex items-center space-x-1">
+                    <button
+                      onClick={() => paginate(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === 1
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      &laquo;
+                    </button>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                      <button
+                        key={number}
+                        onClick={() => paginate(number)}
+                        className={`px-3 py-1 rounded-md ${
+                          currentPage === number
+                            ? "bg-rose-500 text-white"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    ))}
+                    
+                    <button
+                      onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === totalPages
+                          ? "text-gray-400 cursor-not-allowed"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      &raquo;
+                    </button>
+                  </nav>
+                </div>
+              )}
             </div>
           </motion.div>
         ) : (
