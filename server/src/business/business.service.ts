@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { Business, BusinessDocument } from './schemas/business.schema';
 import { User, UserDocument } from '@/user/schemas/user.schema';
-import { Product, ProductDocument } from '@/product/schemas/product.schemas';
+import { Product, ProductDocument } from '@/product/schemas/product.schema';
 import { UpdateProductDto } from '@/product/dto/update-product.dto';
 import { UpdatePropertyProductDto } from '@/product/dto/update-property-product.dto';
 

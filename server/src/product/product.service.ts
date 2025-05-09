@@ -8,7 +8,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { Model, ObjectId, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product, ProductDocument } from './schemas/product.schemas';
+import { Product, ProductDocument } from './schemas/product.schema';
 import { Business, BusinessDocument } from '@/business/schemas/business.schema';
 import { ErrorService } from '@/common/services/error.service';
 

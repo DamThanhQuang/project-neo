@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types, Document } from 'mongoose';
+import mongoose, { Types, Document } from 'mongoose';
 
 export type ProductDocument = Product & Document;
 
@@ -76,28 +76,14 @@ export class Product {
   @Prop({ type: [String], default: [] })
   amenities: string[];
 
-  // Reviews
-  // @Prop({
-  //   type: [
-  //     {
-  //       bookingId: String,
-  //       userId: String,
-  //       rating: Number,
-  //       comment: String,
-  //       createdAt: Date,
-  //     },
-  //   ],
-  //   default: [],
-  // })
-  // reviews: {
-  //   userId: string;
-  //   rating: number;
-  //   comment: string;
-  //   createdAt: Date;
-  // }[];
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }] })
+  reviews: Types.ObjectId[];
 
-  // @Prop({ default: 0 })
-  // averageRating: number;
+  @Prop({ default: 0 })
+  totalReviews: number;
+
+  @Prop({ default: 0 })
+  averageRating: number;
 
   @Prop({ default: false })
   isNew: boolean;

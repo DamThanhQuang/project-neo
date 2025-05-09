@@ -14,12 +14,13 @@ import { S3Module } from './aws/s3.module';
 import { ErrorService } from './common/services/error.service';
 import { BookingModule } from './booking/booking.module';
 import { MailModule } from './mail/mail.module';
-import { join } from 'path';
+import path, { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { StripeModule } from './payment/stripe/stripe.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReviewModule } from './review/review.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ReviewModule } from './review/review.module';
     MailModule,
     StripeModule,
     ReviewModule,
+    ProductModule,
   ],
   controllers: [AppController, ExampleController],
   providers: [
@@ -79,6 +81,7 @@ import { ReviewModule } from './review/review.module';
       useClass: JwtAuthGuard,
     },
     ErrorService,
+    ChatGateway,
   ],
   exports: [ErrorService],
 })

@@ -4,7 +4,7 @@ import { BusinessController } from './business.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Business, BusinessSchema } from './schemas/business.schema';
 import { User, UserSchema } from '@/user/schemas/user.schema';
-import { Product, ProductSchema } from '@/product/schemas/product.schemas';
+import { Product, ProductSchema } from '@/product/schemas/product.schema';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({

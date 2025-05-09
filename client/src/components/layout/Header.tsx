@@ -49,7 +49,7 @@ export default function Header() {
       ) {
         setIsUserMenuOpen(false);
       }
-      
+
       if (
         navMenuRef.current &&
         !navMenuRef.current.contains(event.target as Node)
@@ -87,7 +87,8 @@ export default function Header() {
 
         const firstName = userData.firstName || "";
         const lastName = userData.lastName || "";
-        const fullName = firstName && lastName ? `${firstName} ${lastName}` : '';
+        const fullName =
+          firstName && lastName ? `${firstName} ${lastName}` : "";
         setUser({
           name: userData.name || fullName || "User",
           email: userData.email || "",
@@ -146,7 +147,10 @@ export default function Header() {
         <div className="flex items-center justify-between py-3">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Link href="/home" className="flex items-center transition-transform hover:scale-105">
+            <Link
+              href="/home"
+              className="flex items-center transition-transform hover:scale-105"
+            >
               <Image
                 src="https://img.icons8.com/?size=100&id=UH55vOLfw0MO&format=png&color=000000"
                 alt="Tripadvisor Logo"
@@ -203,15 +207,19 @@ export default function Header() {
             <div className="flex items-center border border-gray-200 rounded-full px-3 py-1.5 shadow-sm hover:shadow-md transition-all duration-200">
               {/* Navigation Menu Dropdown */}
               <div className="relative mr-3" ref={navMenuRef}>
-                <button 
+                <button
                   onClick={() => setIsNavMenuOpen(!isNavMenuOpen)}
                   className="flex items-center space-x-1 focus:outline-none"
                   aria-label="Navigation menu"
                 >
                   <FaBars className="text-gray-600 w-4 h-4" />
-                  <FaChevronDown className={`w-3 h-3 text-gray-500 ml-1 transition-transform duration-200 ${isNavMenuOpen ? 'rotate-180' : ''}`} />
+                  <FaChevronDown
+                    className={`w-3 h-3 text-gray-500 ml-1 transition-transform duration-200 ${
+                      isNavMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
-                
+
                 {/* Nav Links Dropdown */}
                 <AnimatePresence>
                   {isNavMenuOpen && (
@@ -228,9 +236,10 @@ export default function Header() {
                           key={link.name}
                           href={link.href}
                           className={`flex items-center px-4 py-2.5 text-sm
-                                    ${isActiveLink(link.href)
-                                      ? "bg-emerald-50 text-emerald-700"
-                                      : "text-gray-700 hover:bg-gray-50"
+                                    ${
+                                      isActiveLink(link.href)
+                                        ? "bg-emerald-50 text-emerald-700"
+                                        : "text-gray-700 hover:bg-gray-50"
                                     } transition-colors`}
                           onClick={() => setIsNavMenuOpen(false)}
                         >
@@ -242,7 +251,7 @@ export default function Header() {
                   )}
                 </AnimatePresence>
               </div>
-              
+
               {/* Divider */}
               <div className="h-6 w-px bg-gray-300 mx-2"></div>
 
@@ -267,8 +276,10 @@ export default function Header() {
                             "https://flowbite.com/docs/images/people/profile-picture-5.jpg";
                         }}
                       />
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 
-                                    border-2 border-white rounded-full"></span>
+                      <span
+                        className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 
+                                    border-2 border-white rounded-full"
+                      ></span>
                     </div>
                   </button>
 
@@ -283,8 +294,10 @@ export default function Header() {
                         className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg 
                                  py-2 z-50 border border-gray-100 overflow-hidden"
                       >
-                        <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r 
-                                     from-emerald-50 to-white">
+                        <div
+                          className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r 
+                                     from-emerald-50 to-white"
+                        >
                           <p className="text-sm font-medium text-gray-900">
                             {user.name}
                           </p>
@@ -294,21 +307,25 @@ export default function Header() {
                         </div>
 
                         <Link
-                          href="/profile"
-                          className="flex items-center px-4 py-2.5 text-sm text-gray-700 
-                                   hover:bg-gray-50 transition-colors"
+                          href="/message"
+                          className="flex items-center px-4 py-2.5 text-sm text-black-700 hover:bg-gray-50 transition-colors"
                         >
-                          <FaUser className="w-4 h-4 mr-3 text-emerald-600" />
-                          Profile
+                          Tin nhắn
                         </Link>
 
                         <Link
-                          href="/settings"
-                          className="flex items-center px-4 py-2.5 text-sm text-gray-700 
+                          href="/trip"
+                          className="flex items-center px-4 py-2.5 text-sm text-black-700 
                                    hover:bg-gray-50 transition-colors"
                         >
-                          <FaCog className="w-4 h-4 mr-3 text-emerald-600" />
-                          Settings
+                          Chuyến đi
+                        </Link>
+
+                        <Link
+                          href="/wishlist"
+                          className="flex items-center px-4 py-2.5 text-sm text-black-700 hover:bg-gray-50 transition-colors"
+                        >
+                          Danh sách yêu thích
                         </Link>
 
                         <div className="border-t border-gray-100 my-1"></div>
@@ -318,17 +335,15 @@ export default function Header() {
                           className="flex items-center px-4 py-2.5 text-sm text-gray-700 
                                    hover:bg-gray-50 transition-colors"
                         >
-                          <FaBriefcase className="w-4 h-4 mr-3 text-emerald-600" />
                           Quản lý căn hộ, phòng cho thuê
                         </Link>
 
                         <Link
-                          href="/trip"
+                          href="/profile"
                           className="flex items-center px-4 py-2.5 text-sm text-gray-700 
                                    hover:bg-gray-50 transition-colors"
                         >
-                          <IoIosAirplane className="w-4 h-4 mr-3 text-emerald-600" />
-                          Chuyến đi của bạn
+                          Tài khoản
                         </Link>
 
                         <div className="border-t border-gray-100 my-1"></div>
@@ -339,7 +354,7 @@ export default function Header() {
                                    hover:bg-red-50 transition-colors"
                         >
                           <FaSignOutAlt className="w-4 h-4 mr-3" />
-                          Sign out
+                          Đăng xuất
                         </button>
                       </motion.div>
                     )}
@@ -383,7 +398,7 @@ export default function Header() {
                            focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm"
                 />
                 <FaSearch className="absolute left-3 top-3.5 text-gray-400" />
-                <button 
+                <button
                   type="submit"
                   className="absolute right-2 top-2 bg-emerald-500 text-white p-1.5 rounded-full"
                   aria-label="Search"
@@ -428,7 +443,9 @@ export default function Header() {
                   />
                   <div>
                     <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
 
@@ -467,7 +484,7 @@ export default function Header() {
                     <IoIosAirplane className="w-4 h-4 mr-3 text-emerald-600" />
                     Chuyến đi của bạn
                   </Link>
-                  
+
                   <div className="pt-2 mt-2 border-t border-gray-100">
                     <button
                       onClick={handleSignOut}
