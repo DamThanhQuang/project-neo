@@ -20,7 +20,7 @@ import { StripeModule } from './payment/stripe/stripe.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReviewModule } from './review/review.module';
-import { ChatGateway } from './chat/chat.gateway';
+// import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -81,7 +81,7 @@ import { ChatGateway } from './chat/chat.gateway';
       useClass: JwtAuthGuard,
     },
     ErrorService,
-    ChatGateway,
+    // ChatGateway,
   ],
   exports: [ErrorService],
 })
