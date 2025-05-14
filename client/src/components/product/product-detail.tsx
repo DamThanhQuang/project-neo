@@ -35,8 +35,9 @@ interface Review {
   title: string;
   comment: string;
   user: {
-    name: string;
+    fromUserId: string;
     image: string;
+    name: string; // Added name field to match ProductReviews interface
   };
   date: string;
 }
@@ -91,7 +92,6 @@ export default function ProductDetail() {
 
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
-    // Could add API call to save favorite status
   };
 
   // Outside click handler for gallery
@@ -152,18 +152,21 @@ export default function ProductDetail() {
             country: "N/A",
           },
           rating: productData.averageRating || 0,
-          reviews:
-            productData.reviews?.map((r: any, i: number) => ({
-              id: i,
-              rating: r.rating || 0,
-              title: "Review",
-              comment: r.comment || "",
-              user: {
-                name: r.userId || "Anonymous",
-                image: "https://via.placeholder.com/150",
-              },
-              date: new Date(r.createdAt).toLocaleDateString(),
-            })) || [],
+          reviews: productData.reviews
+            ? productData.reviews.map((review: any) => ({
+                id: review._id || review.id || 0,
+                rating: review.rating || 0,
+                comment: review.comment || "",
+                user: {
+                  fromUserId: review.fromUserId?._id || review.fromUserId || "",
+                  image:
+                    review.fromUserId?.avatar ||
+                    "https://via.placeholder.com/150",
+                  name: review.fromUserId?.name || "Anonymous",
+                },
+                date: new Date(review.createdAt).toLocaleDateString(),
+              }))
+            : [],
           host: {
             name: "Host",
             image: "https://via.placeholder.com/150",

@@ -46,11 +46,11 @@ export default function ReviewModal({
         handleCloseIntent();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -63,11 +63,11 @@ export default function ReviewModal({
         handleCloseIntent();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener("keydown", handleEscKey);
     }
-    
+
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
@@ -93,7 +93,7 @@ export default function ReviewModal({
 
     setIsSubmitting(true);
     setErrorMessage("");
-    
+
     try {
       const token = Cookies.get("token");
       const response = await axios.post(
@@ -111,7 +111,7 @@ export default function ReviewModal({
           },
         }
       );
-      
+
       if (response.status !== 201) {
         throw new Error("Có lỗi xảy ra");
       }
@@ -136,25 +136,18 @@ export default function ReviewModal({
     "Không hài lòng",
     "Bình thường",
     "Hài lòng",
-    "Rất hài lòng"
+    "Rất hài lòng",
   ];
 
-  const feedbackEmojis = [
-    "",
-    "😞",
-    "🙁",
-    "😐",
-    "🙂",
-    "😄"
-  ];
-  
+  const feedbackEmojis = ["", "😞", "🙁", "😐", "🙂", "😄"];
+
   const ratingColors = [
     "",
     "text-red-500",
     "text-orange-500",
     "text-yellow-500",
     "text-lime-500",
-    "text-green-500"
+    "text-green-500",
   ];
 
   return (
@@ -176,11 +169,14 @@ export default function ReviewModal({
           >
             {/* Decorative top bar */}
             <div className="h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 w-full"></div>
-            
+
             <div className="p-7">
-              <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <div className="flex justify-between items-center mb-2 border-b pb-2">
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <HiOutlineEmojiHappy className="mr-2 text-blue-500" size={24} />
+                  <HiOutlineEmojiHappy
+                    className="mr-2 text-blue-500"
+                    size={24}
+                  />
                   Đánh giá dịch vụ
                 </h2>
                 <button
@@ -193,27 +189,41 @@ export default function ReviewModal({
               </div>
 
               <div className="mb-8 text-center">
-                <p className="text-gray-600 mb-1">
-                  Đánh giá của bạn về
-                </p>
+                <p className="text-gray-600 mb-1">Đánh giá của bạn về</p>
                 <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
                   {productName}
                 </h3>
               </div>
 
               {showSuccessMessage ? (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-green-50 border border-green-200 rounded-xl p-6 text-center"
                 >
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    <svg
+                      className="w-10 h-10 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      ></path>
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-green-800 mb-2">Đánh giá thành công!</h3>
-                  <p className="text-green-600">Cảm ơn bạn đã đánh giá và góp ý. Chúng tôi rất trân trọng phản hồi của bạn.</p>
+                  <h3 className="text-lg font-medium text-green-800 mb-2">
+                    Đánh giá thành công!
+                  </h3>
+                  <p className="text-green-600">
+                    Cảm ơn bạn đã đánh giá và góp ý. Chúng tôi rất trân trọng
+                    phản hồi của bạn.
+                  </p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -221,7 +231,7 @@ export default function ReviewModal({
                     <p className="text-center text-lg font-medium text-gray-700 mb-4">
                       Bạn cảm thấy trải nghiệm này thế nào?
                     </p>
-                    
+
                     <div className="flex space-x-5 mb-3">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <motion.button
@@ -237,8 +247,8 @@ export default function ReviewModal({
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className={`h-14 w-14 transition-all duration-300 ${
-                              (hoverRating || rating) >= star 
-                                ? "text-yellow-400 drop-shadow-lg" 
+                              (hoverRating || rating) >= star
+                                ? "text-yellow-400 drop-shadow-lg"
                                 : "text-gray-200"
                             }`}
                             viewBox="0 0 20 20"
@@ -249,17 +259,23 @@ export default function ReviewModal({
                         </motion.button>
                       ))}
                     </div>
-                    
+
                     <AnimatePresence>
                       {(rating > 0 || hoverRating > 0) && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                           className={`flex flex-col items-center mt-3`}
                         >
-                          <span className="text-3xl mb-1">{feedbackEmojis[hoverRating || rating]}</span>
-                          <p className={`text-lg font-medium ${ratingColors[hoverRating || rating]}`}>
+                          <span className="text-3xl mb-1">
+                            {feedbackEmojis[hoverRating || rating]}
+                          </span>
+                          <p
+                            className={`text-lg font-medium ${
+                              ratingColors[hoverRating || rating]
+                            }`}
+                          >
                             {feedbackTitles[hoverRating || rating]}
                           </p>
                         </motion.div>
@@ -270,7 +286,13 @@ export default function ReviewModal({
                   <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
                     <label className="block text-base font-medium text-gray-700 mb-3 flex justify-between">
                       <span>Chi tiết trải nghiệm của bạn</span>
-                      <span className={`text-sm ${comment.length >= MAX_COMMENT_LENGTH ? 'text-red-500' : 'text-gray-500'}`}>
+                      <span
+                        className={`text-sm ${
+                          comment.length >= MAX_COMMENT_LENGTH
+                            ? "text-red-500"
+                            : "text-gray-500"
+                        }`}
+                      >
                         {comment.length}/{MAX_COMMENT_LENGTH}
                       </span>
                     </label>
@@ -285,20 +307,22 @@ export default function ReviewModal({
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                       placeholder="Chia sẻ những điều bạn thích, những điều có thể cải thiện..."
                     ></textarea>
-                    
+
                     <div className="flex justify-between mt-3">
-                      <button 
+                      <button
                         type="button"
                         className="inline-flex items-center text-gray-500 hover:text-blue-600 text-sm"
                       >
                         <FiImage className="mr-1" /> Thêm hình ảnh
                       </button>
-                      <p className="text-xs text-gray-500 italic">Các trường có dấu * là bắt buộc</p>
+                      <p className="text-xs text-gray-500 italic">
+                        Các trường có dấu * là bắt buộc
+                      </p>
                     </div>
                   </div>
 
                   {errorMessage && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="bg-red-50 text-red-600 p-3 rounded-lg border border-red-100"
@@ -319,10 +343,13 @@ export default function ReviewModal({
                       type="submit"
                       disabled={isSubmitting || rating === 0}
                       className={`px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-medium shadow-md hover:from-blue-700 hover:to-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 inline-flex items-center justify-center ${
-                        (isSubmitting || rating === 0) ? "opacity-70 cursor-not-allowed" : ""
+                        isSubmitting || rating === 0
+                          ? "opacity-70 cursor-not-allowed"
+                          : ""
                       }`}
                     >
-                      <FiSend className="mr-2" /> {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
+                      <FiSend className="mr-2" />{" "}
+                      {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
                     </button>
                   </div>
                 </form>

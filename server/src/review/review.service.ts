@@ -115,71 +115,157 @@ export class ReviewService {
     }
 
     // Tạo mới review nếu tất cả kiểm tra thành công
-    const reviewData = await this.reviewModel.create({
+    // Tạo review mới với một lần gọi
+    const newReview = await this.reviewModel.create({
       ...dto,
       fromUserId: new Types.ObjectId(currentUserId),
+      toUserId: dto.toUserId ? new Types.ObjectId(dto.toUserId) : undefined,
+      bookingId: dto.bookingId ? new Types.ObjectId(dto.bookingId) : undefined,
+      productId: dto.productId ? new Types.ObjectId(dto.productId) : undefined,
     });
 
-    if (dto.toUserId) {
-      reviewData.toUserId = new Types.ObjectId(dto.toUserId);
+    // if this is a product review, update the product document
+    if (dto.type === 'product' && dto.productId) {
+      try {
+        // Xác thực định dạng ObjectId trước
+        if (!Types.ObjectId.isValid(dto.productId)) {
+          console.error(`ID sản phẩm không hợp lệ: ${dto.productId}`);
+          throw new BadRequestException('ID sản phẩm không hợp lệ');
+        }
+
+        console.log('Attempting to find product with ID:', dto.productId);
+
+        // Tạo ObjectId một cách rõ ràng
+        const productObjectId = new Types.ObjectId(dto.productId);
+
+        // Kiểm tra sản phẩm tồn tại trước khi cập nhật
+        const productExists = await this.productModel.findById(productObjectId);
+
+        if (!productExists) {
+          console.error(`Không tìm thấy sản phẩm với ID: ${dto.productId}`);
+          throw new BadRequestException(
+            'Sản phẩm không tồn tại hoặc đã bị xóa',
+          );
+        }
+
+        console.log('Product found before update:', {
+          id: productExists._id.toString(),
+          title: productExists.title,
+        });
+
+        // Sử dụng cập nhật atomic
+        const updateResult = await this.productModel.updateOne(
+          { _id: productObjectId },
+          {
+            $push: { reviews: newReview._id },
+            $inc: { totalReviews: 1 },
+          },
+        );
+
+        if (updateResult.modifiedCount === 0) {
+          console.error('Không thể cập nhật sản phẩm:', updateResult);
+          throw new Error('Không thể cập nhật sản phẩm với review mới');
+        }
+
+        console.log('Product updated successfully:', updateResult);
+
+        // Tính lại điểm trung bình
+        const avgResult = await this.reviewModel.aggregate([
+          { $match: { productId: productObjectId, type: 'product' } },
+          { $group: { _id: null, average: { $avg: '$rating' } } },
+        ]);
+
+        if (avgResult.length > 0) {
+          await this.productModel.updateOne(
+            { _id: productObjectId },
+            { averageRating: avgResult[0].average },
+          );
+        }
+      } catch (error) {
+        console.error('Error updating product with review:', error);
+        throw error;
+      }
     }
 
-    if (dto.bookingId) {
-      reviewData.bookingId = new Types.ObjectId(dto.bookingId);
-    }
-
-    if (dto.productId) {
-      reviewData.productId = new Types.ObjectId(dto.productId);
-    }
-
-    const newReview = await this.reviewModel.create(reviewData);
     return newReview;
   }
 
   async getProductReviews(productId: string) {
-    // Kiểm tra định dạng productId
     if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
       throw new BadRequestException('ID sản phẩm không hợp lệ');
     }
 
-    // Tìm tất cả các review của sản phẩm với type là 'product'
-    const reviews = await this.reviewModel
-      .find({
-        productId: productId,
-        type: 'product',
-      })
-      .populate('fromUserId', 'name avatar') // Lấy thông tin người dùng đánh giá
-      .sort({ createdAt: -1 }) // Sắp xếp theo thời gian mới nhất
-      .exec();
+    // Sử dụng aggregation để lấy reviews và tính toán thống kê trong 1 query
+    const results = await this.reviewModel.aggregate([
+      { $match: { productId: new Types.ObjectId(productId), type: 'product' } },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'fromUserId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+      {
+        $project: {
+          _id: 1,
+          rating: 1,
+          comment: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          type: 1,
+          isLike: 1,
+          like: 1,
+          'fromUserId._id': '$user._id',
+          'fromUserId.name': '$user.name',
+          'fromUserId.avatar': '$user.avatar',
+        },
+      },
+      {
+        $facet: {
+          reviews: [{ $match: {} }],
+          stats: [
+            {
+              $group: {
+                _id: null,
+                totalReviews: { $sum: 1 },
+                averageRating: { $avg: '$rating' },
+                rating1: { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
+                rating2: { $sum: { $cond: [{ $eq: ['$rating', 2] }, 1, 0] } },
+                rating3: { $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] } },
+                rating4: { $sum: { $cond: [{ $eq: ['$rating', 4] }, 1, 0] } },
+                rating5: { $sum: { $cond: [{ $eq: ['$rating', 5] }, 1, 0] } },
+              },
+            },
+          ],
+        },
+      },
+    ]);
 
-    // Tính toán điểm đánh giá trung bình
-    let averageRating = 0;
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0,
-      );
-      averageRating = totalRating / reviews.length;
-    }
-
-    // Thống kê số lượng đánh giá theo rating (1-5 sao)
-    const ratingCounts = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0,
+    const { reviews, stats } = results[0];
+    const statsData = stats[0] || {
+      totalReviews: 0,
+      averageRating: 0,
+      rating1: 0,
+      rating2: 0,
+      rating3: 0,
+      rating4: 0,
+      rating5: 0,
     };
-
-    reviews.forEach((review) => {
-      ratingCounts[review.rating]++;
-    });
 
     return {
       reviews,
-      totalReviews: reviews.length,
-      averageRating,
-      ratingCounts,
+      totalReviews: statsData.totalReviews,
+      averageRating: statsData.averageRating || 0,
+      ratingCounts: {
+        1: statsData.rating1,
+        2: statsData.rating2,
+        3: statsData.rating3,
+        4: statsData.rating4,
+        5: statsData.rating5,
+      },
     };
   }
 
@@ -195,9 +281,9 @@ export class ReviewService {
         toUserId: userId,
         type: 'user',
       })
-      .populate('fromUserId', 'name avatar') // Lấy thông tin người đánh giá
-      .populate('bookingId', 'startDate endDate') // Lấy thông tin booking liên quan
-      .sort({ createdAt: -1 }) // Sắp xếp theo thời gian mới nhất
+      .populate('fromUserId', 'name avatar')
+      .populate('bookingId', 'startDate endDate')
+      .sort({ createdAt: -1 })
       .exec();
 
     // Tính toán điểm đánh giá trung bình

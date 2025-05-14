@@ -3,6 +3,7 @@ import {
   NotFoundException,
   InternalServerErrorException,
   HttpException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Model, ObjectId, Types } from 'mongoose';
@@ -11,6 +12,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { Business, BusinessDocument } from '@/business/schemas/business.schema';
 import { ErrorService } from '@/common/services/error.service';
+import path from 'path';
 
 @Injectable()
 export class ProductService {
@@ -22,7 +24,7 @@ export class ProductService {
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
     try {
-      console.log('BusinessId received:', createProductDto.businessId); // Debug log
+      console.log('BusinessId received:', createProductDto.businessId);
 
       // Tìm business trước khi tạo sản phẩm
       const business = await this.businessModel
@@ -45,6 +47,9 @@ export class ProductService {
         businessId: business._id,
         _id: new Types.ObjectId(),
         image: createProductDto.images[0],
+        reviews: [],
+        totalReviews: 0,
+        averageRating: 0,
       });
 
       console.log(newProduct);
@@ -64,45 +69,6 @@ export class ProductService {
     }
   }
 
-  // async addReview(addReviewDto: AddReviewDto): Promise<Product> {
-  //   try {
-  //     const product = await this.productModel
-  //       .findById(new Types.ObjectId(addReviewDto.productId))
-  //       .exec();
-
-  //     console.log('Product search result:', product);
-
-  //     if (!product) {
-  //       throw new NotFoundException(
-  //         `Product not found with productId: ${addReviewDto.productId}`,
-  //       );
-  //     }
-
-  //     // Thêm review
-  //     product.reviews.push({
-  //       userId: addReviewDto.userId,
-  //       rating: addReviewDto.rating,
-  //       comment: addReviewDto.comment,
-  //       createdAt: new Date(),
-  //     });
-
-  //     // Tính rating trung bình
-  //     product.averageRating =
-  //       product.reviews.reduce((total, review) => total + review.rating, 0) /
-  //       product.reviews.length;
-
-  //     // Lưu và trả về sản phẩm đã cập nhật
-  //     return await product.save();
-  //   } catch (error) {
-  //     console.error('Add review error:', {
-  //       productId: addReviewDto.productId,
-  //       error: error.message,
-  //       collection: this.productModel.collection.name,
-  //     });
-  //     throw error;
-  //   }
-  // }
-
   async findAll(): Promise<Product[]> {
     try {
       const products = await this.productModel.find().exec();
@@ -118,36 +84,27 @@ export class ProductService {
     }
   }
 
-  async findProductById(productId: string): Promise<Product> {
-    try {
-      // Validate the ID format first before querying
-      if (!productId || !Types.ObjectId.isValid(productId)) {
-        throw this.errorService.badRequest(
-          'Invalid product ID format',
-          'INVALID_PRODUCT_ID',
-        );
-      }
-
-      const product = await this.productModel
-        .findById(new Types.ObjectId(productId))
-        .exec();
-
-      console.log('Product search result:', product);
-
-      if (!product) {
-        throw this.errorService.notFound('Product', productId);
-      }
-
-      return product;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw this.errorService.serverError('Error fetching product', {
-        productId,
-        error,
-      });
+  // Thêm hàm này vào ProductService
+  async findProductById(id: string): Promise<Product> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID sản phẩm không hợp lệ');
     }
+
+    const product = await this.productModel
+      .findById(new Types.ObjectId(id))
+      .populate({
+        path: 'reviews',
+        select: 'rating comment fromUserId createdAt',
+        populate: {
+          path: 'fromUserId',
+          select: 'name avatar',
+        },
+      });
+    if (!product) {
+      throw new NotFoundException(`Không tìm thấy sản phẩm với ID: ${id}`);
+    }
+
+    return product;
   }
 
   async findOne(id: string) {
@@ -158,6 +115,14 @@ export class ProductService {
     try {
       const product = await this.productModel
         .findById(new Types.ObjectId(id))
+        .populate({
+          path: 'reviews',
+          select: 'rating comment fromUserId createdAt',
+          populate: {
+            path: 'fromUserId',
+            select: 'name avatar',
+          },
+        })
         .exec();
       if (!product) {
         throw this.errorService.notFound('Product', id);
