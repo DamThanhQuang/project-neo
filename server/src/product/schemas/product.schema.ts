@@ -3,6 +3,24 @@ import mongoose, { Types, Document } from 'mongoose';
 
 export type ProductDocument = Product & Document;
 
+@Schema()
+export class ProductLocation {
+  @Prop()
+  address: string;
+
+  @Prop()
+  city: string;
+
+  @Prop()
+  country: string;
+
+  @Prop()
+  latitude: number;
+
+  @Prop()
+  longitude: number;
+}
+
 @Schema({ timestamps: true })
 export class Product {
   @Prop({ type: Types.ObjectId, auto: true })
@@ -39,15 +57,8 @@ export class Product {
   businessId: Types.ObjectId;
 
   // Location details
-  @Prop({ type: Object, required: true })
-  location: {
-    address: string;
-    apartment?: string;
-    district: string;
-    city: string;
-    country: string;
-    postalCode?: string;
-  };
+  @Prop({ type: ProductLocation })
+  location: ProductLocation;
 
   // Privacy type
   @Prop({

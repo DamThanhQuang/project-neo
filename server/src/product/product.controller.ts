@@ -24,11 +24,6 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
-  // @Post('add-reviews/:id')
-  // @UseGuards(JwtAuthGuard)
-  // async addReview(@Body() addReviewDto: AddReviewDto) {
-  //   return this.productService.addReview(addReviewDto);
-  // }
   @Get('get-all-product')
   @Public()
   async getAllProduct() {
@@ -38,8 +33,13 @@ export class ProductController {
   @Get('get-product/:id')
   @Public()
   async getProduct(@Param('id') id: string) {
-    console.log('Product ID:', id);
-    return this.productService.findProductById(id);
+    try {
+      console.log('Product ID:', id);
+      return await this.productService.findProductById(id);
+    } catch (error) {
+      console.error(`Error fetching product ${id}:`, error.message);
+      throw error;
+    }
   }
 
   @Put('update-description/:id')

@@ -134,26 +134,31 @@ export default function ProductDetail() {
           ? response.data[0]
           : response.data;
 
+        // Lấy dữ liệu sản phẩm từ đúng vị trí
+        const productInfo = productData.product;
+        const businessInfo = productData.business;
+        const ownerInfo = productData.owner;
+
         // Transform backend data to match your frontend Product interface
         const transformedProduct = {
-          id: productData._id,
-          image: productData.images || [productData.image || ""],
-          title: productData.title || productData.name || "Product Title",
-          description: productData.description || {
+          id: productInfo._id,
+          image: productInfo.images || [productInfo.image || ""],
+          title: productInfo.title || productInfo.name || "Product Title",
+          description: productInfo.description || {
             description: "Product Description",
             descriptionDetail: "Product Details",
             guestsAmenities: "Guest Amenities",
             interactionWithGuests: "Interaction with Guests",
           },
-          price: productData.price || 0,
-          location: productData.location || {
+          price: productInfo.price || 0,
+          location: productInfo.location || {
             address: "N/A",
             city: "N/A",
             country: "N/A",
           },
-          rating: productData.averageRating || 0,
-          reviews: productData.reviews
-            ? productData.reviews.map((review: any) => ({
+          rating: productInfo.averageRating || 0,
+          reviews: productInfo.reviews
+            ? productInfo.reviews.map((review: any) => ({
                 id: review._id || review.id || 0,
                 rating: review.rating || 0,
                 comment: review.comment || "",
@@ -168,8 +173,11 @@ export default function ProductDetail() {
               }))
             : [],
           host: {
-            name: "Host",
-            image: "https://via.placeholder.com/150",
+            name:
+              typeof ownerInfo === "string"
+                ? ownerInfo.split("@")[0]
+                : businessInfo?.name || "Host",
+            image: ownerInfo?.avatar || "https://via.placeholder.com/150",
             isSuperhost: false,
           },
           amenities: productData.amenities || [
@@ -600,7 +608,15 @@ export default function ProductDetail() {
 
                 {/* Location Tab */}
                 {activeTab === "location" && (
-                  <ProductLocation location={product.location} />
+                  <ProductLocation
+                    location={{
+                      address: "123 Đường ABC",
+                      city: "Đà Nẵng",
+                      country: "Việt Nam",
+                      latitude: 16.047079,
+                      longitude: 108.20623,
+                    }}
+                  />
                 )}
 
                 {/* Host Tab */}

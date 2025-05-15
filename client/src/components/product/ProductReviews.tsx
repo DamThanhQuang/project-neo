@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { use, useState } from "react";
-import { FaStar } from "react-icons/fa";
+import { useState } from "react";
+import { FaStar, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
 
 interface Rating {
   stars: number;
@@ -33,66 +33,55 @@ export default function ProductReviews({
   averageRating,
   totalRatings,
 }: ProductReviewsProps) {
-  const [hoveredLikeId, setHoveredLikeId] = useState<number | null>(null);
-  const feedbackEmojis = ["", "😞", "🙁", "😐", "🙂", "😄"];
+  const [likedReviews, setLikedReviews] = useState<number[]>([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3);
+
+  const handleLikeReview = (reviewId: number) => {
+    if (likedReviews.includes(reviewId)) {
+      setLikedReviews(likedReviews.filter((id) => id !== reviewId));
+    } else {
+      setLikedReviews([...likedReviews, reviewId]);
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white p-4 md:p-6 rounded-xl"
     >
-      {/* Guest Favorite Badges */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex items-center bg-white rounded-lg border border-gray-100 p-2 shadow-sm">
-          <img
-            src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-GuestFavorite/original/78b7687c-5acf-4ef8-a5ea-eda732ae3b2f.png"
-            alt="Guest Favorite Badge"
-            className="h-10 w-10 mr-3"
-          />
-          <div>
-            <p className="font-medium text-sm">Khách yêu thích</p>
-            <p className="text-xs text-gray-500">
-              Một trong những địa điểm được đánh giá cao nhất
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center bg-white rounded-lg border border-gray-100 p-2 shadow-sm">
-          <img
-            src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-GuestFavorite/original/b4005b30-79ff-4287-860c-67829ecd7412.png"
-            alt="Top Rated Badge"
-            className="h-10 w-10 mr-3"
-          />
-          <div>
-            <p className="font-medium text-sm">Đánh giá xuất sắc</p>
-            <p className="text-xs text-gray-500">Dịch vụ chất lượng hàng đầu</p>
-          </div>
-        </div>
-      </div>
+      <h2 className="text-2xl font-bold mb-6">Đánh giá sản phẩm</h2>
 
       <div className="flex flex-col md:flex-row gap-8 mb-8">
+        {/* Ratings summary section */}
         <div className="flex-1">
-          <h3 className="text-xl font-semibold mb-4">
-            <div className="flex items-center gap-2">
-              <FaStar className="text-black-400" />
-              <span>{averageRating}</span>
-              <span className="text-gray-700">·</span>
-              <span>{totalRatings} đánh giá</span>
-            </div>
-          </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <FaStar className="text-yellow-500 w-5 h-5" />
+            <span className="text-xl font-bold">
+              {averageRating.toFixed(1)}
+            </span>
+            <span className="text-gray-700">·</span>
+            <span className="text-gray-700">{totalRatings} đánh giá</span>
+          </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {ratings.map((rating) => (
-              <div key={rating.stars} className="flex items-center gap-2">
-                <span className="w-1 text-gray-600">{rating.stars}</span>
-                <div className="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-black-400 rounded-full"
-                    style={{ width: `${rating.percentage}%` }}
-                  ></div>
+              <div key={rating.stars} className="flex items-center gap-3">
+                <span className="w-8 text-gray-700 font-medium">
+                  {rating.stars} ★
+                </span>
+                <div className="flex-grow h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${rating.percentage}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="h-full bg-yellow-500 rounded-full"
+                  ></motion.div>
                 </div>
-                <span className="w-8 text-right text-gray-500 text-sm">
+                <span className="w-12 text-right text-gray-600 text-sm">
                   {rating.count}
                 </span>
               </div>
@@ -100,78 +89,123 @@ export default function ProductReviews({
           </div>
         </div>
 
-        <div className="md:w-64 p-6 bg-black-50 rounded-xl flex flex-col items-center justify-center">
-          <div className="font-bold text-4xl text-black-600 mb-2">
-            {averageRating}
+        {/* Rating highlight card */}
+        <div className="md:w-80 p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex flex-col items-center justify-center shadow-md">
+          <div className="flex items-center justify-center mb-6 ">
+            <img
+              src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-GuestFavorite/original/78b7687c-5acf-4ef8-a5ea-eda732ae3b2f.png"
+              alt="Award Left"
+              className="w-20 h-16 object-contain transform transition-transform duration-300"
+            />
+            <div className="font-bold text-7xl text-gray-800 mx-2">
+              {averageRating.toFixed(1)}
+            </div>
+            <img
+              src="https://a0.muscache.com/im/pictures/airbnb-platform-assets/AirbnbPlatformAssets-GuestFavorite/original/b4005b30-79ff-4287-860c-67829ecd7412.png"
+              alt="Award Right"
+              className="w-20 h-16 object-contain transform transition-transform duration-300"
+            />
           </div>
-          <div className="flex mb-2">
+
+          <div className="flex mb-3">
             {[...Array(5)].map((_, i) => (
               <FaStar
                 key={i}
-                className={
+                className={`w-5 h-5 ${
                   i < Math.floor(averageRating)
-                    ? "text-black-400"
+                    ? "text-yellow-500"
+                    : i < averageRating
+                    ? "text-gradient-star"
                     : "text-gray-300"
-                }
+                }`}
               />
             ))}
           </div>
-          <div className="text-sm text-gray-600">
-            Trên tổng số {totalRatings} đánh giá
+          <div className="text-sm text-gray-600 text-center">
+            Dựa trên {totalRatings} đánh giá từ khách hàng
           </div>
         </div>
       </div>
-      {/* Review List */}
+
+      {/* Reviews list */}
+      <h3 className="text-xl font-semibold mb-4">Nhận xét khách hàng</h3>
       <div className="mt-6 space-y-4">
-        {reviews.map((review) => (
-          <motion.div
-            key={review.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow"
-          >
-            <div className="flex items-start">
-              <img
-                src={review.user.image}
-                alt={review.user.name}
-                className="w-8 h-8 rounded-full mr-3 object-cover"
-              />
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium text-sm text-gray-900">
-                      {review.user.name}
-                    </h4>
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar
-                          key={i}
-                          className={
-                            i < review.rating
-                              ? "text-black-400 w-3 h-3"
-                              : "text-gray-300 w-3 h-3"
-                          }
-                        />
-                      ))}
-                      <span className="ml-1 text-xs text-gray-500">
-                        {review.date}
-                      </span>
+        <AnimatePresence>
+          {displayedReviews.map((review) => (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all"
+            >
+              <div className="flex items-start">
+                <img
+                  src={review.user.image}
+                  alt={review.user.name}
+                  className="w-10 h-10 rounded-full mr-3 object-cover border border-gray-200"
+                />
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {review.user.name}
+                      </h4>
+                      <div className="flex items-center mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            className={
+                              i < review.rating
+                                ? "text-yellow-500 w-4 h-4"
+                                : "text-gray-300 w-4 h-4"
+                            }
+                          />
+                        ))}
+                        <span className="ml-2 text-xs text-gray-500">
+                          {review.date}
+                        </span>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => handleLikeReview(review.id)}
+                      className="text-gray-500 hover:text-blue-500 transition-colors"
+                    >
+                      {likedReviews.includes(review.id) ? (
+                        <FaThumbsUp className="w-4 h-4" />
+                      ) : (
+                        <FaRegThumbsUp className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="mt-3 text-gray-700">
+                    {review.title && (
+                      <p className="font-medium mb-1">{review.title}</p>
+                    )}
+                    <p className="text-sm leading-relaxed">{review.comment}</p>
                   </div>
                 </div>
-
-                <div className="mt-2 text-sm text-gray-700 whitespace-pre-line">
-                  {review.title && (
-                    <p className="font-medium text-sm mb-0.5">{review.title}</p>
-                  )}
-                  {review.comment}
-                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
+
+      {reviews.length > 3 && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setShowAllReviews(!showAllReviews)}
+            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 font-medium transition-colors"
+          >
+            {showAllReviews
+              ? "Thu gọn đánh giá"
+              : `Xem thêm ${reviews.length - 3} đánh giá`}
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }

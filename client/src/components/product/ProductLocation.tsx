@@ -1,15 +1,31 @@
 import { motion } from "framer-motion";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { Map, Marker } from "react-map-gl/mapbox";
 
 interface ProductLocationProps {
   location: {
     address: string;
     city: string;
     country: string;
+    latitude: number;
+    longitude: number;
   };
 }
 
+// Get MapBox access token from environment variables
+const MAPBOX_TOKEN =
+  "pk.eyJ1IjoiZGFtcXVhbmciLCJhIjoiY21hcDR3dXY4MGRsdzJvcHk5bWdoZTFlYSJ9._z2zA5665s6s_1HMsYg_pg";
+
 export default function ProductLocation({ location }: ProductLocationProps) {
+  // Sử dụng tọa độ mặc định nếu không có
+  const latitude = location.latitude || 21.0285; // Tọa độ Hà Nội mặc định
+  const longitude = location.longitude || 105.8542; // Tọa độ Hà Nội mặc định
+
+  // Kiểm tra xem có tọa độ hay không
+  const hasCoordinates = latitude !== undefined && longitude !== undefined;
+  console.log("Location data:", location);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -23,12 +39,29 @@ export default function ProductLocation({ location }: ProductLocationProps) {
       </p>
 
       <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="text-center p-8">
-            <FaMapMarkerAlt className="mx-auto text-4xl text-gray-400 mb-2" />
-            <p className="text-gray-600">Bản đồ hiện chưa được tải</p>
+        {hasCoordinates ? (
+          <Map
+            mapboxAccessToken={MAPBOX_TOKEN}
+            initialViewState={{
+              longitude: longitude,
+              latitude: latitude,
+              zoom: 14,
+            }}
+            style={{ width: "100%", height: "100%" }}
+            mapStyle="mapbox://styles/mapbox/streets-v11"
+          >
+            <Marker longitude={longitude} latitude={latitude} anchor="bottom">
+              <FaMapMarkerAlt className="text-red-500 text-3xl" />
+            </Marker>
+          </Map>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-center p-8">
+              <FaMapMarkerAlt className="mx-auto text-4xl text-gray-400 mb-2" />
+              <p className="text-gray-600">Bản đồ hiện chưa được tải</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl border border-gray-100 mt-4">

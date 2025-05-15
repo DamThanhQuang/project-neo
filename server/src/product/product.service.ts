@@ -84,27 +84,73 @@ export class ProductService {
     }
   }
 
-  // Thêm hàm này vào ProductService
-  async findProductById(id: string): Promise<Product> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('ID sản phẩm không hợp lệ');
-    }
+  async findProductById(productId: string) {
+    try {
+      if (!Types.ObjectId.isValid(productId)) {
+        throw new BadRequestException('Invalid product ID');
+      }
 
-    const product = await this.productModel
-      .findById(new Types.ObjectId(id))
-      .populate({
-        path: 'reviews',
-        select: 'rating comment fromUserId createdAt',
-        populate: {
-          path: 'fromUserId',
-          select: 'name avatar',
+      // Find the product first
+      const product = await this.productModel
+        .findById(new Types.ObjectId(productId))
+        .populate({
+          path: 'reviews',
+          select: 'rating comment fromUserId createdAt',
+          populate: {
+            path: 'fromUserId',
+            select: 'name avatar',
+          },
+        })
+        .exec();
+      console.log('Product found:', product);
+
+      if (!product) {
+        throw this.errorService.notFound('Product', productId);
+      }
+
+      // Get business information using the businessId from the product
+      const business = await this.businessModel
+        .findById(product.businessId)
+        .populate('userId', 'name email avatar')
+        .exec();
+
+      console.log('Business found:', business);
+
+      if (!business) {
+        throw this.errorService.notFound(
+          'Business',
+          product.businessId.toString(),
+        );
+      }
+
+      return {
+        product: {
+          ...product.toJSON(),
+          location: {
+            ...product.location,
+            latitude: product.location?.latitude || 21.0285, // Tọa độ mặc định nếu không có
+            longitude: product.location?.longitude || 105.8542, // Tọa độ Hà Nội (mặc định)
+          },
         },
-      });
-    if (!product) {
-      throw new NotFoundException(`Không tìm thấy sản phẩm với ID: ${id}`);
+        business: {
+          id: business._id,
+          name: business.name,
+          description: business.description,
+        },
+        owner: business.owner,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw this.errorService.serverError(
+        'Error fetching product with business info',
+        {
+          productId,
+          error,
+        },
+      );
     }
-
-    return product;
   }
 
   async findOne(id: string) {
