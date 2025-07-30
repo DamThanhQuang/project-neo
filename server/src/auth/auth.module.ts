@@ -10,6 +10,7 @@ import { JwtStrategy } from './passport/jwt.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Business, BusinessSchema } from '../business/schemas/business.schema';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -25,9 +26,11 @@ import { Business, BusinessSchema } from '../business/schemas/business.schema';
     }),
     PassportModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Business.name, schema: BusinessSchema }]),
+    MongooseModule.forFeature([
+      { name: Business.name, schema: BusinessSchema },
+    ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, GoogleStrategy],
 })
 export class AuthModule {}

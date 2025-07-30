@@ -149,14 +149,13 @@ export function LoginForm({
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-11 font-medium border-gray-300 hover:bg-gray-50 transition-all"
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
+              className="w-full h-11 font-medium border border-gray-300 rounded-md flex items-center justify-center hover:bg-gray-50 transition-all"
             >
               <FcGoogle className="mr-2 h-5 w-5" />
               Continue with Google
-            </Button>
+            </a>
           </form>
         </CardContent>
         <CardFooter>

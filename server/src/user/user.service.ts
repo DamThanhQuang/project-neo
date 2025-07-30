@@ -139,4 +139,54 @@ export class UserService {
       throw new InternalServerErrorException('Error fetching user');
     }
   }
+
+  async upsertGoogleUser(profile: {
+    providerId: string;
+    email?: string;
+    name?: string;
+    avatar?: string;
+  }) {
+    // Find user by providerId
+    let user = await this.userModel.findOne({
+      provider: 'google',
+      providerId: profile.providerId,
+    });
+    if (user) {
+      user.lastLoginAt = new Date();
+      if (!user.avatar && profile.avatar) user.avatar = profile.avatar;
+      if (!user.email && profile.email) user.email = profile.email;
+      if (!user.name && profile.name) user.name = profile.name;
+      await user.save();
+      return user.toObject();
+    }
+
+    // If not found, try to find by email
+    if (profile.email) {
+      user = await this.userModel.findOne({ email: profile.email });
+      if (user) {
+        user.provider = 'google';
+        user.providerId = profile.providerId;
+        user.emailVerified = true;
+        user.lastLoginAt = new Date();
+        if (!user.avatar && profile.avatar) user.avatar = profile.avatar;
+        if (!user.name && profile.name) user.name = profile.name;
+        await user.save();
+        return user.toObject();
+      }
+    }
+
+    // If still not found, create a new user OAuth, (no password required)
+    const created = await this.userModel.create({
+      provider: 'google',
+      providerId: profile.providerId,
+      email: profile.email ?? undefined,
+      emailVerified: true,
+      name: profile.name,
+      avatar: profile.avatar,
+      role: 'user',
+      lastLoginAt: new Date(),
+    });
+
+    return created.toObject();
+  }
 }

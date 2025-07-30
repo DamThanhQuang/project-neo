@@ -23,8 +23,10 @@ async function bootstrap() {
   );
 
   const configService = app.get(ConfigService);
-  const port = configService.get('PORT') || 8000; // Đặt mặc định 8000 nếu PORT chưa được set
+  const port = configService.get('PORT') || 8000;
   console.log(`Server is running on port ${port}`);
+
+  app.use(cookieParser());
 
   app.setGlobalPrefix('/api/v1');
 
@@ -41,7 +43,6 @@ async function bootstrap() {
     });
     next();
   });
-  app.use(cookieParser());
   await app.listen(port);
 }
 bootstrap();

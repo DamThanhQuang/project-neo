@@ -19,6 +19,7 @@ import { Response } from 'express';
 //import { RegisterBusinessDto } from './dto/register-business.dto';
 import { Business, BusinessDocument } from '@/business/schemas/business.schema';
 import { MailerService } from '@nestjs-modules/mailer';
+import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
     @InjectModel(Business.name) private businessModel: Model<BusinessDocument>,
     private mailerService: MailerService,
     private jwtService: JwtService,
+    private readonly users: UserService,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<User> {
@@ -119,5 +121,29 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  async handleGoogleLogin(oauthUser: any) {
+    const user = await this.users.upsertGoogleUser({
+      providerId: oauthUser.providerId,
+      email: oauthUser.email,
+      name: oauthUser.name,
+      avatar: oauthUser.avatar,
+    });
+    return user;
+  }
+
+  signToken(user: any) {
+    return this.jwtService.sign(
+      {
+        sub: String(user._id),
+        email: user.email ?? null,
+        role: user.role ?? 'user',
+      },
+      {
+        expiresIn: process.env.JWT_EXPIRES,
+        secret: process.env.JWT_SECRET,
+      },
+    );
   }
 }
