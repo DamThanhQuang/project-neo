@@ -1,26 +1,32 @@
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, Profile, StrategyOptions } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, Profile } from 'passport-google-oauth20';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(cfg: ConfigService) {
+  constructor(configService: ConfigService) {
     super({
-      clientID: cfg.getOrThrow<string>('GOOGLE_CLIENT_ID'),
-      clientSecret: cfg.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-      callbackURL: cfg.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID')!,
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
+      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL')!,
       scope: ['email', 'profile'],
-    });
+    } as StrategyOptions); 
   }
-  async validate(_at: string, _rt: string, profile: Profile) {
+
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: Profile,
+  ) {
     const { id, displayName, emails, photos } = profile;
+
     return {
       provider: 'google',
       providerId: id,
-      name: displayName,
       email: emails?.[0]?.value,
-      picture: photos?.[0]?.value,
+      name: displayName,
+      avatar: photos?.[0]?.value,
     };
   }
 }

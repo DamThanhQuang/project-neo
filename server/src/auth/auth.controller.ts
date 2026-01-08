@@ -49,29 +49,17 @@ export class AuthController {
     return req.user;
   }
 
-  @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   googleAuth() {}
 
-  @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req, @Res() res: Response) {
-    const user = await this.authService.handleGoogleLogin(req.user);
-    const token = this.authService.signToken(user);
-
-    const isProd = this.cfg.get('NODE_ENV') === 'production';
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+  async googleCallback(@Req() req, @Res() res) {
+    const token = await this.authService.loginWithGoogle(req.user);
 
     return res.redirect(
-      this.cfg.get('FRONTEND_URL') || 'http://localhost:3000',
+      `http://localhost:3000/login-success?token=${token}`,
     );
   }
 

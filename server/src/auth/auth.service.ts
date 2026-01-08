@@ -146,4 +146,25 @@ export class AuthService {
       },
     );
   }
+
+  async loginWithGoogle(googleUser) {
+  let user = await this.userRepository.findOne({
+    where: { email: googleUser.email },
+  });
+
+  if (!user) {
+    user = await this.userRepository.save({
+      email: googleUser.email,
+      name: googleUser.name,
+      avatar: googleUser.avatar,
+      provider: 'google',
+      providerId: googleUser.providerId,
+      role: 'user',
+    });
+  }
+
+  return this.jwtService.sign({
+    userId: user.id,
+    role: user.role,
+  });
 }
